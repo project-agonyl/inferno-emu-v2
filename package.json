@@ -1,0 +1,25 @@
+{
+  "name": "inferno-emu-v2",
+  "version": "0.0.1",
+  "description": "endless online server emulator in node",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm main.js"
+  },
+  "author": "cyberinferno",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/cyberinferno/inferno-emu-v2.git"
+  },
+  "keywords": [
+    "A3",
+    "ServerSideEmulation"
+  ],
+  "license": "proprietary",
+  "dependencies": {
+    "hexy": "^0.2.7",
+    "lodash": "^4.13.1",
+    "mysql": "^2.11.1"
+  }
+}

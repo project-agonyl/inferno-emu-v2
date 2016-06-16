@@ -1,0 +1,21 @@
+{
+	"server": {
+		"login": {
+			"port": 3550
+		},
+		"game": {
+			"port": 9867
+		}
+	},
+	"server_name": "Inferno",
+	"db": {
+		"mysql": {
+			"connection": {
+				"host": "localhost",
+				"user": "root",
+				"password": "",
+				"database": "infernoemu"
+			}
+		}
+	}
+}
