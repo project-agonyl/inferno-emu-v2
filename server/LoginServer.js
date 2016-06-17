@@ -1,38 +1,29 @@
+/*
+ * LoginServer.js - Login server of the emulator
+ */
+
+'use strict';
+
 const net = require('net');
 const config = require(__dirname + '/../config/config.js');
+const client = require(__dirname + '/../helpers/client/login.js');
+
+var clients = {};
 
 var LoginServer = {
+  config: config,
+  clients: clients,
 	start: function() {
+    var loginServerThis = this;
 		var server = net.createServer();
-		server.on('connection', handleConnection);
-
 		server.listen(config.server.login.port, function() {
 		  console.log('Login server listening to port %s', server.address().port);
 		});
-
-		function handleConnection(conn) {
-		  var remoteAddress = conn.remoteAddress + ':' + conn.remotePort;
-		  console.log('new client connection from %s', remoteAddress);
-
-		  conn.setEncoding('utf8');
-
-		  conn.on('data', onConnData);
-		  conn.once('close', onConnClose);
-		  conn.on('error', onConnError);
-
-		  function onConnData(d) {
-		    console.log('connection data from %s: %j', remoteAddress, d);
-		    conn.write(d.toUpperCase());
-		  }
-
-		  function onConnClose() {
-		    console.log('connection from %s closed', remoteAddress);
-		  }
-
-		  function onConnError(err) {
-		    console.log('Connection %s error: %s', remoteAddress, err.message);
-		  }
-		}
+    server.on('connection', function (socket) {
+      loginServerThis.emit('log', 'New connection from ' + socket.remoteAddress);
+      client[socket.remoteAddress + ':' + socket.remotePort] = socket;
+      client(loginServerThis, socket);
+    });
 	}
 };
 
