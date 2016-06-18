@@ -12,7 +12,7 @@ module.exports = function (server, socket) {
   socket.on('data', function (data) {
     switch (data.length) {
       case packet.identifier.login.len.GAME_SERVER_DETAILS_REQUEST:
-        //@todo Handle sending server details request
+        socket.write(packet.helper.getServerDetailsPacket(server.config.server.game.ip, server.config.server.game.port));
         break;
       case packet.identifier.login.len.USER_CREDENTIALS:
         var credentials = packet.helper.getParsedCredentials(data);
@@ -20,8 +20,7 @@ module.exports = function (server, socket) {
           if (rows.length == 0) {
             socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
           } else {
-            //@todo Send game server info
-            socket.write(packet.helper.getPreLoginMessagePacket('Thanks for logging in!'));
+            socket.write(packet.helper.getServerWelcomeMessagePacket(server.config.server_name));
           }
         });
         break;

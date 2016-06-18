@@ -81,6 +81,62 @@ module.exports = {
         username: username,
         password: password
       };
+    },
+    getServerDetailsPacket: function(ip, port) {
+      var packet = [0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe2, 0x11, 0x38, 0x54, 0x00];
+      var toFill = 16 - ip.length;
+      for (var i = 0; i < ip.length; i++) {
+        packet.push(ip.charAt(i).charCodeAt(0));
+      }
+      for (var j = 0; j < toFill; j++) {
+        packet.push(0x00);
+      }
+      var portHexString = port.toString(16);
+      while (portHexString.length < 4) {
+        portHexString = "0" + portHexString;
+      }
+      packet.push(parseInt(portHexString.substr(2,2), 16));
+      packet.push(parseInt(portHexString.substr(0,2), 16));
+      packet.push(0x00);
+      packet.push(0x00);
+      let buffer = new Buffer(packet);
+      return buffer;
+    },
+    getServerWelcomeMessagePacket: function(serverName) {
+      var packet = [0x5c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe3, 0x01];
+      var welcomeMsg = "Welcome to server " + serverName;
+      if (welcomeMsg.Length > 61) {
+        welcomeMsg = welcomeMsg.substr(0, 61);
+      }
+      if (serverName.Length > 13) {
+        serverName = serverName.substr(0, 13);
+      }
+      for (var i = 0; i < welcomeMsg.length; i++) {
+        packet.push(welcomeMsg.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 63 - welcomeMsg.length; i++) {
+        packet.push(0x00);
+      }
+      packet = packet.concat([
+        0x4c, 0x27, 0xd3, 0x77, 0xe4, 0x03, 0x01, 0xf5, 0x21, 0x00, 0x00, 0x00, 0x14, 0x00,
+        0x00, 0x00, 0xe4, 0x03, 0x6f, 0x00, 0x00, 0x00, 0x01, 0x4f, 0x00, 0x00, 0x01, 0xe1,
+        0x01, 0x00, 0x00
+      ]);
+      for (var i = 0; i < serverName.length; i++) {
+        packet.push(serverName.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 13 - serverName.length; i++) {
+        packet.push(0x00);
+      }
+      packet = packet.concat([0x68, 0x00, 0x00, 0x00]);
+      for (var i = 0; i < "ONLINE".length; i++) {
+        packet.push("ONLINE".charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 75; i++) {
+        packet.push(0x00);
+      }
+      let buffer = new Buffer(packet);
+      return buffer;
     }
   }
 };
