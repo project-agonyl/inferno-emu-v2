@@ -4,7 +4,14 @@
 
 'use strict';
 
+const StringDecoder = require('string_decoder').StringDecoder;
+const decoder = new StringDecoder('utf8');
+
 module.exports = {
+  /**
+   * Identifiers are used to identify the packet received from client
+   * @type {Object}
+   */
   identifier: {
     login: {
       len: {
@@ -22,6 +29,11 @@ module.exports = {
     }
   },
   helper: {
+    /**
+     * Returns pre login message packet buffer
+     * @param  {string} msg The message that has to be displayed
+     * @return {Buffer}     Packet buffer
+     */
     getPreLoginMessagePacket: function(msg) {
       var packet = [0x5c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe0, 0x01];
       if (msg.length > 70) {
@@ -34,7 +46,41 @@ module.exports = {
       for (var j = 0; j < toFill; j++) {
         packet.push(0x00);
       }
-      return packet;
+      let buffer = new Buffer(packet);
+      return buffer;
+    },
+    /**
+     * Returns username and password from the given buffer
+     * @param  {Buffer} Buffer received from client to be parsed
+     * @return {object}  Credential object
+     */
+    getParsedCredentials: function(data) {
+      var stringData = decoder.end(data);
+      var temp1 = stringData.substr(10, 20).trim();
+      var temp2 = stringData.substr(31, 20).trim();
+      var username = '',password = '';
+      for (var i = 0; i < temp1.length; i++) {
+        var code = temp1.charCodeAt(i);
+        if (!(code > 47 && code < 58) && // numeric (0-9)
+            !(code > 64 && code < 91) && // upper alpha (A-Z)
+            !(code > 96 && code < 123)) { // lower alpha (a-z)
+          break;
+        }
+        username += temp1.charAt(i);
+      }
+      for (var i = 0; i < temp2.length; i++) {
+        var code = temp2.charCodeAt(i);
+        if (!(code > 47 && code < 58) && // numeric (0-9)
+            !(code > 64 && code < 91) && // upper alpha (A-Z)
+            !(code > 96 && code < 123)) { // lower alpha (a-z)
+          break;
+        }
+        password += temp2.charAt(i);
+      }
+      return {
+        username: username,
+        password: password
+      };
     }
   }
 };

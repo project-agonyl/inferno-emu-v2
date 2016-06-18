@@ -5,22 +5,24 @@
 'use strict';
 
 const net = require('net');
-const config = require(__dirname + '/../config/config.js');
 const client = require(__dirname + '/../helpers/client/login.js');
 
 var clients = {};
 
 var LoginServer = {
-  config: config,
+  config: {},
+  db: null,
   clients: clients,
-	start: function() {
+	start: function(config, db) {
+    this.config = config;
+    this.db = db;
     var loginServerThis = this;
 		var server = net.createServer();
 		server.listen(config.server.login.port, function() {
 		  console.log('Login server listening to port %s', server.address().port);
 		});
     server.on('connection', function (socket) {
-      loginServerThis.emit('log', 'New connection from ' + socket.remoteAddress);
+      console.log('New connection from ' + socket.remoteAddress);
       client[socket.remoteAddress + ':' + socket.remotePort] = socket;
       client(loginServerThis, socket);
     });

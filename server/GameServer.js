@@ -5,11 +5,13 @@
 'use strict';
 
 const net = require('net');
-const config = require(__dirname + '/../config/config.js');
 
 var GameServer = {
-  config: config,
-  start: function() {
+  config: {},
+  db: null,
+  start: function(config, db) {
+    this.config = config;
+    this.db = db;
     var server = net.createServer();
     server.on('connection', handleConnection);
 
