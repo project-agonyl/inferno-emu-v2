@@ -16,7 +16,7 @@
     "A3",
     "ServerSideEmulation"
   ],
-  "license": "proprietary",
+  "license": "GPL-3.0",
   "dependencies": {
     "hexy": "^0.2.7",
     "lodash": "^4.13.1",
