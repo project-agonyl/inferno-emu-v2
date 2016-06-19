@@ -7,12 +7,9 @@
 const net = require('net');
 const client = require(__dirname + '/../helpers/client/login.js');
 
-var clients = {};
-
 var LoginServer = {
   config: {},
   db: null,
-  clients: clients,
 	start: function(config, db) {
     this.config = config;
     this.db = db;

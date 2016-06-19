@@ -6,6 +6,7 @@
 
 var packet = require(__dirname + '/../packet.js');
 var hexy = require('hexy');
+var clients = require(__dirname + '/../clients.js');
 
 module.exports = function (server, socket) {
   // Data receive handler
