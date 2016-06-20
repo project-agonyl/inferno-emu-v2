@@ -15,9 +15,9 @@ module.exports = {
    */
   prepare: function(config) {
     console.log('Preparing database connection');
-    var connnectionConfig = config.db.mysql.connection;
-    connnectionConfig.connectionLimit = 100;
-    connnectionConfig.debug = false;
+    var connectionConfig = config.db.mysql.connection;
+    connectionConfig.connectionLimit = 100;
+    connectionConfig.debug = false;
     this.connectionPool = mysql.createPool(config.db.mysql.connection);
     this.isPrepared = true;
   },

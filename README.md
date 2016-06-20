@@ -1,4 +1,4 @@
-Inferno Emu A3 emulator for A3 MMORPG
+Inferno Emu emulator for A3 MMORPG
 ======================================
 
 Overview of A3
@@ -14,8 +14,8 @@ Requirements
 
 Running the Project
 -------------------
-1. Install dependancies using command ``npm install``
+1. Install dependencies using command ``npm install``
 2. Create local configuration file named ``main-local.json`` inside config folder and override database connection settings
-3. Import database schema from ``data/db.sql`` from data folder into your emulator database
+3. Import database schema from ``data/db.sql`` into your emulator database
 4. Insert example data to test from ``data/seed.sql`` if necessary
 5. Run the command ``node main`` to start the server
