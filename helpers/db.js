@@ -24,32 +24,32 @@ module.exports = {
   },
   validateCredentials: function (username, password, onResultCallback) {
     this.executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
-        if (!err) {
-            onResultCallback(rows);
-        }
-        else {
-            onResultCallback([]);
-        }
+      if (!err) {
+          onResultCallback(rows);
+      }
+      else {
+          onResultCallback([]);
+      }
     });
   },
   executeQuery: function (query, onExecuteCallback) {
     var result = null;
     this.connectionPool.getConnection(function (connectionError, connection) {
-        if (connectionError) {
-            onExecuteCallback(connectionError, result);
-        }
-        else {
-            connection.query(query, function (queryError, rows) {
-                if (queryError) {
-                    onExecuteCallback(queryError, result);
-                }
-                else {
-                    connection.release();
-                    result = rows;
-                    onExecuteCallback(queryError, result);
-                }
-            });
-        }
+      if (connectionError) {
+        onExecuteCallback(connectionError, result);
+      }
+      else {
+        connection.query(query, function (queryError, rows) {
+          if (queryError) {
+            onExecuteCallback(queryError, result);
+          }
+          else {
+            connection.release();
+            result = rows;
+            onExecuteCallback(queryError, result);
+          }
+        });
+      }
     });
   }
 };
