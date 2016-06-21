@@ -8,48 +8,48 @@ var mysql = require('mysql');
 var logger = require('./logger.js');
 
 module.exports = {
-    connectionPool: null,
-    isPrepared: false,
-    /**
-      * Prepares database connection pool to b e used later
-      * @param  {object} config
-      */
-    prepare: function (config) {
-        logger.info('Preparing database connection');
-        var connectionConfig = config.db.mysql.connection;
-        connectionConfig.connectionLimit = 100;
-        connectionConfig.debug = false;
-        this.connectionPool = mysql.createPool(config.db.mysql.connection);
-        this.isPrepared = true;
-    },
-    validateCredentials: function (username, password, onResultCallback) {
-        this.executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
-            if (!err) {
-                onResultCallback(rows);
-            }
-            else {
-                onResultCallback([]);
-            }
-        });
-    },
-    executeQuery: function (query, onExecuteCallback) {
-        var result = null;
-        this.connectionPool.getConnection(function (connectionError, connection) {
-            if (connectionError) {
-                onExecuteCallback(connectionError, result);
-            }
-            else {
-                connection.query(query, function (queryError, rows) {
-                    if (queryError) {
-                        onExecuteCallback(queryError, result);
-                    }
-                    else {
-                        connection.release();
-                        result = rows;
-                        onExecuteCallback(queryError, result);
-                    }
-                });
-            }
-        });
-    }
+  connectionPool: null,
+  isPrepared: false,
+  /**
+    * Prepares database connection pool to b e used later
+    * @param  {object} config
+    */
+  prepare: function (config) {
+    logger.info('Preparing database connection');
+    var connectionConfig = config.db.mysql.connection;
+    connectionConfig.connectionLimit = 100;
+    connectionConfig.debug = false;
+    this.connectionPool = mysql.createPool(config.db.mysql.connection);
+    this.isPrepared = true;
+  },
+  validateCredentials: function (username, password, onResultCallback) {
+    this.executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
+        if (!err) {
+            onResultCallback(rows);
+        }
+        else {
+            onResultCallback([]);
+        }
+    });
+  },
+  executeQuery: function (query, onExecuteCallback) {
+    var result = null;
+    this.connectionPool.getConnection(function (connectionError, connection) {
+        if (connectionError) {
+            onExecuteCallback(connectionError, result);
+        }
+        else {
+            connection.query(query, function (queryError, rows) {
+                if (queryError) {
+                    onExecuteCallback(queryError, result);
+                }
+                else {
+                    connection.release();
+                    result = rows;
+                    onExecuteCallback(queryError, result);
+                }
+            });
+        }
+    });
+  }
 };
