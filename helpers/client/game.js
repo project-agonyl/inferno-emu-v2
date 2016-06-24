@@ -26,18 +26,9 @@ module.exports = function (server, crypt, socket) {
               socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
             } else {
               server.db.getCharacters(rows[0].id, function(rows){
-                  var buffer = new Buffer(character.prepareCharacterPacket(rows),'hex');
-
-                  var fd =  fs.openSync('new 952', 'w');
-
-                  var buff = new Buffer(buffer, 'base64');
-
-                  fs.write(fd, buff, 0, buff.length, 0, function(err,written){
-
-                  });
-                  socket.write(crypt.encrypt(buffer),'base64');
+                  var buffer = new Buffer(character.prepareCharacterPacket(rows),'base64');
+                  socket.write(crypt.encrypt(buffer));
               });
-              //send character packet 952
             }
           });
           break;
