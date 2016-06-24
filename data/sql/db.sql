@@ -4,7 +4,7 @@ CREATE IF NOT EXISTS TABLE `account` (
   `username` VARCHAR(255) NOT NULL ,
   `email` VARCHAR(255) NOT NULL ,
   `password` VARCHAR(255) NOT NULL ,
-  `status` INT NOT NULL DEFAULT '1' ,
+  `status` INT NOT NULL DEFAULT '10' ,
   `access_level` INT NOT NULL DEFAULT '1' ,
   `is_online` BOOLEAN NOT NULL DEFAULT FALSE ,
   `created_by` BIGINT NULL ,
