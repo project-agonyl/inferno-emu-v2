@@ -14,7 +14,7 @@ try {
 try {
   mainLocalConfig = require('./main-local.json');
 } catch (ex) {
-  console.error('Error loading main-local.json. Server will continue with defaul config settings');
+  console.error('Error loading main-local.json. Server will continue with default config settings');
 }
 
 config = _.merge({}, mainConfig, mainLocalConfig);
