@@ -54,10 +54,10 @@ module.exports = {
     * @param  {Buffer} Buffer received from client to be parsed
     * @return {object}  Credential object
     */
-    getParsedCredentials: function (data) {
+    getParsedCredentials: function (data, usernameStartIndex, passwordStartIndex) {
       var stringData = decoder.end(data);
-      var temp1 = stringData.substr(10, 20).trim();
-      var temp2 = stringData.substr(31, 20).trim();
+      var temp1 = stringData.substr(usernameStartIndex, 20).trim();
+      var temp2 = stringData.substr(passwordStartIndex, 20).trim();
       var username = '', password = '';
       for (var i = 0; i < temp1.length; i++) {
           var code = temp1.charCodeAt(i);
@@ -107,6 +107,32 @@ module.exports = {
       packet.push(0x00);
       let buffer = new Buffer(packet);
       return buffer;
+    },
+    validatePacketSize:function(packet,length){
+      if(this.intFromBytes(packet) == length)
+        return true;
+      else
+        return false;
+    },
+    intFromBytes:function(packet){
+      var val = 0;
+      packet = packet.slice(0,2).reverse();
+      for (var i = 0; i < packet.length; ++i) {
+        val += packet[i];
+        if (i < packet.length-1) {
+          val = val << 8;
+        }
+      }
+      return val;
+    },
+    toBytesInt32:function(num) {
+      var arr = [
+       (num & 0xff000000) >> 24,
+       (num & 0x00ff0000) >> 16,
+       (num & 0x0000ff00) >> 8,
+       (num & 0x000000ff)
+      ];
+      return arr.reverse();
     },
     getServerWelcomeMessagePacket: function (serverName) {
       var packet = [0x5c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe3, 0x01];
