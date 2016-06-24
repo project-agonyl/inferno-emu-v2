@@ -32,6 +32,17 @@ module.exports = {
       }
     });
   },
+  getCharacters: function(id, onResultCallback)
+  {
+    this.executeQuery("SELECT * FROM character WHERE account_id=" + id,function(err, rows){
+      if (!err) {
+          onResultCallback(rows);
+      }
+      else {
+          onResultCallback([]);
+      }
+    });
+  },
   executeQuery: function (query, onExecuteCallback) {
     var result = null;
     this.connectionPool.getConnection(function (connectionError, connection) {

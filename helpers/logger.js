@@ -5,9 +5,9 @@ var fs = require('fs'),
 
 var logger = tracer.colorConsole({
     format    : [
-        '[{{timestamp}}] ({{path}}:{{line}}) => {{message}}',
+        '[{{timestamp}}] - [{{title}}] ({{path}}:{{line}}) => {{message}}',
         {
-            info: '[{{timestamp}}] [{{title}}] {{message}}'
+            info: '[{{timestamp}}] - [{{title}}] => {{message}}'
         }
     ],
     filters   : [
