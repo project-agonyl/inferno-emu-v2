@@ -18,9 +18,7 @@ module.exports = function (server, socket) {
           socket.write(packet.helper.getServerDetailsPacket(server.config.server.game.ip, server.config.server.game.port));
           break;
         case packet.identifier.login.len.USER_CREDENTIALS:
-          var usernameStartIndex = 10;
-          var passwordStartIndex = 31;
-          var credentials = packet.helper.getParsedCredentials(data, usernameStartIndex, passwordStartIndex);
+          var credentials = packet.helper.getParsedCredentials(data, 10, 31);
           server.db.validateCredentials(credentials.username, credentials.password, function(rows) {
             if (rows.length == 0) {
               socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
@@ -34,10 +32,8 @@ module.exports = function (server, socket) {
           console.log(hexy.hexy(data));
           break;
       }
-    }
-    else
-    {
-      logger.debug("Packet size doesn't match with actual size of packet");
+    } else {
+      logger.debug("Packet size doesn't match with given size of packet");
     }
   });
   // Connection close handler

@@ -14,13 +14,10 @@ var fs = require("fs");
 module.exports = function (server, crypt, socket) {
   // Data receive handler
   socket.on('data', function (data) {
-    if(packet.helper.validatePacketSize(data,data.length)){
-      switch(data.length)
-      {
+    if(packet.helper.validatePacketSize(data,data.length)) {
+      switch(data.length) {
         case packet.identifier.game.len.PREPARE_USER:
-          var usernameStartIndex = 14;
-          var passwordStartIndex = 35;
-          var credentials = packet.helper.getParsedCredentials(data, usernameStartIndex, passwordStartIndex);
+          var credentials = packet.helper.getParsedCredentials(data, 14, 35);
           server.db.validateCredentials(credentials.username, credentials.password, function(rows) {
             if (rows.length == 0) {
               socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
@@ -37,9 +34,7 @@ module.exports = function (server, crypt, socket) {
           console.log(hexy.hexy(data));
           break;
       }
-    }
-    else
-    {
+    } else {
       logger.debug("Packet size doesn't match with actual size of packet");
     }
   });

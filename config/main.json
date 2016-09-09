@@ -20,9 +20,9 @@
 			}
 		}
 	},
-    "cryptography": {
-        "constant_key_1": 2366183,
-        "constant_key_2": 1432754,
-        "dynamic_key": 79984829
-    }
+  "cryptography": {
+    "constant_key_1": 2366183,
+    "constant_key_2": 1432754,
+    "dynamic_key": 79984829
+  }
 }
