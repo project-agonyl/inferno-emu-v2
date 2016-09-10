@@ -1,4 +1,5 @@
 var packet = require("./packet.js");
+const logger = require('./logger.js');
 
 var characterType = {WARRIOR:0x00, MAGE:0x00, HK:0x00, ARCHER:0x00, EMPTY:0xFF};
 var characterTown = {TEMOZ:0x00, QUANANTO: 0x01};
@@ -14,30 +15,39 @@ module.exports = {
     try {
       var characterNameLength = 20;
       var charPacket = [];
+      var charName;
+      var charType;
+      var charTown;
+      var charLevel;
       if(rows[index] == undefined) {
-        var charName = "";
-        var charType = characterType.EMPTY;
-        var charTown = characterTown.TEMOZ;
-        var charLevel = 0;
-        for(var i=0;i<characterNameLength;i++) {
-          charPacket.push(0x00);
-        }
-        charPacket.push(0x00);
-        charPacket.push(0x01);
-        charPacket.push(charType);
-        charPacket.push(charTown);
-        charPacket = charPacket.concat(packet.helper.toBytesInt32(charLevel));
-        var packetLength = charPacket.length ;
-        for(var i=0;i<188-packetLength;i++) {
-          charPacket.push(0x00);
-        }
-        return charPacket;
-        //blank character
+        charName = "";
+        charType = characterType.EMPTY;
+        charTown = characterTown.TEMOZ;
+        charLevel = 0;
       } else {
-        //Prepare character from DB
+        charName = rows[index].name;
+        charType = rows[index].type;
+        charTown = rows[index].town;
+        charLevel = rows[index].level;
       }
+      for(var i = 0; i < charName.length; i++) {
+        charPacket.push(charName.charAt(i).charCodeAt(0));
+      }
+      for(var i = 0;i < characterNameLength - charName.length;i++) {
+        charPacket.push(0x00);
+      }
+      charPacket.push(0x00);
+      charPacket.push(0x01);
+      charPacket.push(charType);
+      charPacket.push(charTown);
+      charPacket = charPacket.concat(packet.helper.toBytesInt32(charLevel));
+      var packetLength = charPacket.length;
+      for(var i = 0;i < 188 - packetLength;i++) {
+        charPacket.push(0x00);
+      }
+      return charPacket;
     } catch(e) {
-      console.log("ex : ",e);
+      logger.info("ex : ",e);
     }
   }
 };

@@ -31,9 +31,8 @@ module.exports = {
       }
     });
   },
-  getCharacters: function(id, onResultCallback)
-  {
-    this.executeQuery("SELECT * FROM character WHERE account_id=" + id,function(err, rows){
+  getCharacters: function(id, onResultCallback) {
+    this.executeQuery("SELECT * FROM `character` WHERE account_id = " + id, function(err, rows){
       if (!err) {
         onResultCallback(rows);
       } else {
@@ -49,6 +48,7 @@ module.exports = {
       } else {
         connection.query(query, function (queryError, rows) {
           if (queryError) {
+            logger.error(queryError);
             onExecuteCallback(queryError, result);
           } else {
             connection.release();

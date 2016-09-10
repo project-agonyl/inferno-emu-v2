@@ -14,7 +14,7 @@ var fs = require("fs");
 module.exports = function (server, crypt, socket) {
   // Data receive handler
   socket.on('data', function (data) {
-    if(packet.helper.validatePacketSize(data,data.length)) {
+    if(packet.helper.validatePacketSize(data, data.length)) {
       switch(data.length) {
         case packet.identifier.game.len.PREPARE_USER:
           var credentials = packet.helper.getParsedCredentials(data, 14, 35);
@@ -23,8 +23,8 @@ module.exports = function (server, crypt, socket) {
               socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
             } else {
               server.db.getCharacters(rows[0].id, function(rows){
-                  var buffer = new Buffer(character.prepareCharacterPacket(rows),'base64');
-                  socket.write(crypt.encrypt(buffer));
+                var buffer = new Buffer(character.prepareCharacterPacket(rows),'base64');
+                socket.write(crypt.encrypt(buffer));
               });
             }
           });

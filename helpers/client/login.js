@@ -12,7 +12,7 @@ var logger = require(__dirname + '/../logger.js');
 module.exports = function (server, socket) {
   // Data receive handler
   socket.on('data', function (data) {
-    if(packet.helper.validatePacketSize(data,data.length)){
+    if(packet.helper.validatePacketSize(data, data.length)){
       switch (data.length) {
         case packet.identifier.login.len.GAME_SERVER_DETAILS_REQUEST:
           socket.write(packet.helper.getServerDetailsPacket(server.config.server.game.ip, server.config.server.game.port));
