@@ -13,6 +13,7 @@ var character = require(__dirname + '/../character.js');
 module.exports = function (server, crypt, socket, redisClient) {
   // Data receive handler
   socket.on('data', function (data) {
+<<<<<<< HEAD
     if(packet.helper.validatePacketSize(data, data.length)){
       switch(data.length)
       {
@@ -37,6 +38,19 @@ module.exports = function (server, crypt, socket, redisClient) {
                       socket.write(crypt.encrypt(buffer));
                   });
                 }
+=======
+    if(packet.helper.validatePacketSize(data, data.length)) {
+      switch(data.length) {
+        case packet.identifier.game.len.PREPARE_USER:
+          var credentials = packet.helper.getParsedCredentials(data, 14, 35);
+          server.db.validateCredentials(credentials.username, credentials.password, function(rows) {
+            if (rows.length == 0) {
+              socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
+            } else {
+              server.db.getCharacters(rows[0].id, function(rows){
+                var buffer = new Buffer(character.prepareCharacterPacket(rows),'base64');
+                socket.write(crypt.encrypt(buffer));
+>>>>>>> 0f57800df62d552cf77547411166974d6edd4f39
               });
             }
           });
@@ -85,9 +99,7 @@ module.exports = function (server, crypt, socket, redisClient) {
           console.log("\nDecrypted : \n",hexy.hexy(crypt.decrypt(data)));
           break;
       }
-    }
-    else
-    {
+    } else {
       logger.debug("Packet size doesn't match with actual size of packet");
     }
   });

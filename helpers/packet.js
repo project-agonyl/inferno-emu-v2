@@ -47,32 +47,33 @@ module.exports = {
       for (var j = 0; j < toFill; j++) {
           packet.push(0x00);
       }
-      let buffer = new Buffer(packet);
-      return buffer;
+      return new Buffer(packet);
     },
     /**
-    * Returns username and password from the given buffer
-    * @param  {Buffer} Buffer received from client to be parsed
-    * @return {object}  Credential object
-    */
+     * Returns username and password from the given buffer
+     * @param data
+     * @param usernameStartIndex
+     * @param passwordStartIndex
+     * @return {object}  Credential object
+     */
     getParsedCredentials: function (data, usernameStartIndex, passwordStartIndex) {
       var stringData = decoder.end(data);
       var temp1 = stringData.substr(usernameStartIndex, 20).trim();
       var temp2 = stringData.substr(passwordStartIndex, 20).trim();
       var username = '', password = '';
       for (var i = 0; i < temp1.length; i++) {
-          var code = temp1.charCodeAt(i);
-          if (!this.escapeNonAlphNumeric(code)) { // lower alpha (a-z)
-            break;
-          }
-          username += temp1.charAt(i);
+        var code = temp1.charCodeAt(i);
+        if (!this.escapeNonAlphNumeric(code)) { // lower alpha (a-z)
+          break;
+        }
+        username += temp1.charAt(i);
       }
       for (var i = 0; i < temp2.length; i++) {
-          var code = temp2.charCodeAt(i);
-          if (!this.escapeNonAlphNumeric(code)) { // lower alpha (a-z)
-            break;
-          }
-          password += temp2.charAt(i);
+        var code = temp2.charCodeAt(i);
+        if (!this.escapeNonAlphNumeric(code)) { // lower alpha (a-z)
+          break;
+        }
+        password += temp2.charAt(i);
       }
       return {
           username: username,
@@ -85,9 +86,7 @@ module.exports = {
       !(charCode > 96 && charCode < 123)) { // lower alpha (a-z)
         return false
       }
-      else {
-        return true;
-      }
+      return true;
     },
     getServerDetailsPacket: function (ip, port) {
       var packet = [0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe2, 0x11, 0x38, 0x54, 0x00];
@@ -106,8 +105,7 @@ module.exports = {
       packet.push(parseInt(portHexString.substr(0, 2), 16));
       packet.push(0x00);
       packet.push(0x00);
-      let buffer = new Buffer(packet);
-      return buffer;
+      return new Buffer(packet);
     },
     validatePacketSize:function(packet,length){
       if(this.intFromBytes(packet) == length)
@@ -191,6 +189,7 @@ module.exports = {
       for (var i = 0; i < 75; i++) {
         packet.push(0x00);
       }
+<<<<<<< HEAD
       let buffer = new Buffer(packet);
       return buffer;
     },
@@ -202,6 +201,9 @@ module.exports = {
         byteArray.push(0x00);
       }
       return byteArray;
+=======
+      return new Buffer(packet);
+>>>>>>> 0f57800df62d552cf77547411166974d6edd4f39
     }
   }
 };

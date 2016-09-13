@@ -20,6 +20,7 @@
 			}
 		}
 	},
+<<<<<<< HEAD
     "cryptography": {
         "constant_key_1": 2366183,
         "constant_key_2": 1432754,
@@ -75,4 +76,11 @@
             "boots": 0
         }
     }
+=======
+  "cryptography": {
+    "constant_key_1": 2366183,
+    "constant_key_2": 1432754,
+    "dynamic_key": 79984829
+  }
+>>>>>>> 0f57800df62d552cf77547411166974d6edd4f39
 }

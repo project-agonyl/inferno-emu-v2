@@ -26,12 +26,17 @@ module.exports = {
     this.executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
       if (!err) {
         onResultCallback(rows);
+<<<<<<< HEAD
       }
       else {
+=======
+      } else {
+>>>>>>> 0f57800df62d552cf77547411166974d6edd4f39
         onResultCallback([]);
       }
     });
   },
+<<<<<<< HEAD
   getCharacters: function(id, onResultCallback)
   {
     this.executeQuery("SELECT * FROM `character` WHERE account_id=" + id + " AND is_deleted=0 ORDER BY created_at",function(err, rows){
@@ -39,6 +44,13 @@ module.exports = {
         onResultCallback(rows);
       }
       else {
+=======
+  getCharacters: function(id, onResultCallback) {
+    this.executeQuery("SELECT * FROM `character` WHERE account_id = " + id, function(err, rows){
+      if (!err) {
+        onResultCallback(rows);
+      } else {
+>>>>>>> 0f57800df62d552cf77547411166974d6edd4f39
         onResultCallback([]);
       }
     });
@@ -52,13 +64,12 @@ module.exports = {
     this.connectionPool.getConnection(function (connectionError, connection) {
       if (connectionError) {
         onExecuteCallback(connectionError, result);
-      }
-      else {
+      } else {
         connection.query(query, function (queryError, rows) {
           if (queryError) {
+            logger.error(queryError);
             onExecuteCallback(queryError, result);
-          }
-          else {
+          } else {
             connection.release();
             result = rows;
             onExecuteCallback(queryError, result);
