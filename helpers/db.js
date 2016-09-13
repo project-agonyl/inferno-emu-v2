@@ -11,9 +11,9 @@ module.exports = {
   connectionPool: null,
   isPrepared: false,
   /**
-    * Prepares database connection pool to b e used later
-    * @param  {object} config
-    */
+   * Prepares database connection pool to b e used later
+   * @param  {object} config
+   */
   prepare: function (config) {
     logger.info('Preparing database connection');
     var connectionConfig = config.db.mysql.connection;
@@ -31,8 +31,8 @@ module.exports = {
       }
     });
   },
-  getCharacters: function(id, onResultCallback) {
-    this.executeQuery("SELECT * FROM `character` WHERE account_id = " + id, function(err, rows){
+  getCharacters: function (id, onResultCallback) {
+    this.executeQuery("SELECT * FROM `character` WHERE account_id = " + id, function (err, rows) {
       if (!err) {
         onResultCallback(rows);
       } else {
@@ -47,11 +47,11 @@ module.exports = {
         onExecuteCallback(connectionError, result);
       } else {
         connection.query(query, function (queryError, rows) {
+          connection.release();
           if (queryError) {
             logger.error(queryError);
             onExecuteCallback(queryError, result);
           } else {
-            connection.release();
             result = rows;
             onExecuteCallback(queryError, result);
           }

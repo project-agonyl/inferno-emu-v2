@@ -1,8 +1,6 @@
-const _ = require('lodash');
+var _ = require('lodash');
 
-var config,
-  mainConfig = {},
-  mainLocalConfig = {};
+var config, mainConfig = {}, mainLocalConfig = {};
 
 try {
   mainConfig = require('./main.json');
