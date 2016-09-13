@@ -1,4 +1,5 @@
 const _ = require('lodash');
+var logger = require(__dirname + '/../helpers/logger.js');
 
 var config,
   mainConfig = {},
@@ -8,13 +9,13 @@ try {
   mainConfig = require('./main.json');
 } catch (ex) {
   console.error(ex.message);
-  console.error('Error loading main.json');
+  logger.error('Error loading main.json');
 }
 
 try {
   mainLocalConfig = require('./main-local.json');
 } catch (ex) {
-  console.error('Error loading main-local.json. Server will continue with default config settings');
+  logger.error('Error loading main-local.json. Server will continue with default config settings');
 }
 
 config = _.merge({}, mainConfig, mainLocalConfig);
