@@ -2,11 +2,10 @@
 
 module.exports = {
   config: null,
-
-  prepare: function(config){
+  prepare: function (config) {
     this.config = config;
   },
-  encrypt: function(packet){
+  encrypt: function (packet) {
     for (var i = 12; ((i + 4) | 0) <= packet.length; i = (i + 4) | 0) {
       var DynamicKey = this.config.cryptography.dynamic_key;
       for (var j = i; j < ((i + 4) | 0); j = (j + 1) | 0) {

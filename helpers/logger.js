@@ -1,7 +1,7 @@
-var fs = require('fs'),
-  colors = require('colors'),
-  cluster = require('cluster'),
-  tracer = require('tracer');
+var fs = require('fs');
+var colors = require('colors');
+var cluster = require('cluster');
+var tracer = require('tracer');
 
 var logger = tracer.colorConsole({
   format: [
@@ -12,9 +12,9 @@ var logger = tracer.colorConsole({
   ],
   filters: [
     {
-      warn : colors.yellow,
+      warn: colors.yellow,
       error: colors.red.bold,
-      info : colors.green,
+      info: colors.green,
       debug: colors.cyan
     }
   ],

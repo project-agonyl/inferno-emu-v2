@@ -3,20 +3,18 @@
  */
 
 'use strict';
-
-const net = require('net');
-const client = require(__dirname + '/../helpers/client/game.js');
-const logger = require(__dirname + '/../helpers/logger.js');
-
+var net = require('net');
+var client = require(__dirname + '/../helpers/client/game.js');
+var logger = require(__dirname + '/../helpers/logger.js');
 var GameServer = {
   config: {},
   db: null,
-  start: function(config, crypt, db, redisClient) {
+  start: function (config, crypt, db, redisClient) {
     this.config = config;
     this.db = db;
     var gameServerThis = this;
     var server = net.createServer();
-    server.listen(config.server.game.port, function() {
+    server.listen(config.server.game.port, function () {
       logger.info('Game server listening to port %s', server.address().port);
     });
     server.on('connection', function (socket) {
