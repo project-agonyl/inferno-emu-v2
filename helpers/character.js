@@ -1,6 +1,6 @@
 var packet = require("./packet.js");
 
-var characterType = {WARRIOR:0x00, MAGE:0x00, HK:0x00, ARCHER:0x00, EMPTY:0xFF};
+var characterType = {WARRIOR:0x00, MAGE:0x02, HK:0x00, ARCHER:0x00, EMPTY:0xFF};
 var characterTown = {TEMOZ:0x00, QUANANTO: 0x01};
 module.exports={
   prepareCharacterPacket: function(rows){
@@ -15,10 +15,10 @@ module.exports={
   {
     try
     {
-      var characterNameLength = 20;
       var charPacket = [];
-      if(rows[i] == undefined)
+      if(rows[index] == undefined) // blank character
       {
+        var characterNameLength = 20;
         var charName = "";
         var charType = characterType.EMPTY;
         var charTown = characterTown.TEMOZ;
@@ -38,16 +38,44 @@ module.exports={
           charPacket.push(0x00);
         }
         return charPacket;
-        //blank character
       }
       else
       {
-        //Prepare character from DB
+        var charName = rows[index].name;
+        var charType = characterType.WARRIOR;
+        var charTown = characterTown.TEMOZ;
+        var charLevel = 0;
+        var charNameBytes = packet.helper.getBytesFromString(charName)
+        charPacket = charPacket.concat(charNameBytes);
+        charPacket = charPacket.concat(packet.helper.getNullBytes(20 - charNameBytes.length));
+        charPacket.push(0x00);
+        charPacket.push(0x01);
+        charPacket.push(charType);
+        charPacket.push(charTown);
+        charPacket = charPacket.concat(packet.helper.toBytesInt32(charLevel));
+        var packetLength = charPacket.length ;
+        for(var i=0;i<188-packetLength;i++)
+        {
+          charPacket.push(0x00);
+        }
+        return charPacket;
+        //Prepare character from DB record
       }
     }
     catch(e)
     {
       console.log("ex : ",e);
     }
+  },
+  createCharacter:function(packet, accountId)
+  {
+    var charType = packet[12];
+    var charTown = packet[13];
+    var charName = packet.helper.getStringFromBytes(packet,14,33);
+
+  },
+  deleteCharacter:function(packet)
+  {
+
   }
 }

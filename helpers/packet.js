@@ -22,6 +22,7 @@ module.exports = {
     game: {
       len: {
         PREPARE_USER: 56,
+        CREATE_CHARACTER: 35,
         SELECT_CHARACTER: 37,
         DELETE_CHARACTER: 33,
         DESTROY_USER: 12
@@ -116,13 +117,14 @@ module.exports = {
     },
     intFromBytes:function(packet){
       var val = 0;
-      packet = packet.slice(0,2).reverse();
-      for (var i = 0; i < packet.length; ++i) {
-        val += packet[i];
-        if (i < packet.length-1) {
+      var sizeBytes = packet.slice(0,2).reverse();
+      for (var i = 0; i < sizeBytes.length; ++i) {
+        val += sizeBytes[i];
+        if (i < sizeBytes.length-1) {
           val = val << 8;
         }
       }
+      packet.slice(0,2).reverse();
       return val;
     },
     toBytesInt32:function(num) {
@@ -133,6 +135,28 @@ module.exports = {
        (num & 0x000000ff)
       ];
       return arr.reverse();
+    },
+    getBytesFromString:function(stringValue)
+    {
+      var bytes=[];
+      for(var i=0;i<stringValue.length;i++)
+      {
+        bytes.push(stringValue.charAt(i).charCodeAt(0));
+      }
+      return bytes;
+    },
+    getStringFromBytes:function(bytesValue,startIndex,stopIndex)
+    {
+      var stringValue = '';
+      for(var i = startIndex; i <= stopIndex; i++)
+      {
+        var code = bytesValue.charCodeAt(i);
+          if (!this.escapeNonAlphNumeric(code)) {
+            continue;
+          }
+          stringValue += bytesValue.charAt(i);
+      }
+      return stringValue;
     },
     getServerWelcomeMessagePacket: function (serverName) {
       var packet = [0x5c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe3, 0x01];
@@ -169,6 +193,15 @@ module.exports = {
       }
       let buffer = new Buffer(packet);
       return buffer;
+    },
+    getNullBytes:function(length)
+    {
+      var byteArray = [];
+      for(var i=0; i<length; i++)
+      {
+        byteArray.push(0x00);
+      }
+      return byteArray;
     }
   }
 };

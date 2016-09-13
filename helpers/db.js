@@ -25,23 +25,27 @@ module.exports = {
   validateCredentials: function (username, password, onResultCallback) {
     this.executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
       if (!err) {
-          onResultCallback(rows);
+        onResultCallback(rows);
       }
       else {
-          onResultCallback([]);
+        onResultCallback([]);
       }
     });
   },
   getCharacters: function(id, onResultCallback)
   {
-    this.executeQuery("SELECT * FROM character WHERE account_id=" + id,function(err, rows){
+    this.executeQuery("SELECT * FROM `character` WHERE account_id=" + id + " AND is_deleted=0 ORDER BY created_at",function(err, rows){
       if (!err) {
-          onResultCallback(rows);
+        onResultCallback(rows);
       }
       else {
-          onResultCallback([]);
+        onResultCallback([]);
       }
     });
+  },
+  createCharacter: function(accountId,characterDetails)
+  {
+
   },
   executeQuery: function (query, onExecuteCallback) {
     var result = null;

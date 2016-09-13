@@ -11,7 +11,7 @@ const logger = require(__dirname + '/../helpers/logger.js');
 var LoginServer = {
   config: {},
   db: null,
-	start: function(config, db) {
+	start: function(config, db, redisClient) {
     this.config = config;
     this.db = db;
     var loginServerThis = this;
@@ -21,7 +21,7 @@ var LoginServer = {
 		});
     server.on('connection', function (socket) {
       logger.info('New connection from ' + socket.remoteAddress);
-      client(loginServerThis, socket);
+      client(loginServerThis, socket, redisClient);
     });
 	}
 };

@@ -1,11 +1,11 @@
 {
 	"server": {
 		"login": {
-      "ip": "127.0.0.1",
+            "ip": "127.0.0.1",
 			"port": 3550
 		},
 		"game": {
-      "ip": "127.0.0.1",
+            "ip": "127.0.0.1",
 			"port": 9867
 		}
 	},
@@ -24,5 +24,55 @@
         "constant_key_1": 2366183,
         "constant_key_2": 1432754,
         "dynamic_key": 79984829
+    },
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379
+    },
+    "character_default_wear": {
+        "warrior": {
+            "necklace": 0,
+            "helmet": 0,
+            "ring": 0,
+            "weapon": 0,
+            "armour": 0,
+            "shield": 0,
+            "gloves": 0,
+            "pants": 0,
+            "boots": 0
+        },
+        "mage": {
+            "necklace": 0,
+            "helmet": 0,
+            "ring": 0,
+            "weapon": 0,
+            "armour": 0,
+            "shield": 0,
+            "gloves": 0,
+            "pants": 0,
+            "boots": 0
+        },
+        "holyknight": {
+            "necklace": 0,
+            "helmet": 0,
+            "ring": 0,
+            "weapon": 0,
+            "armour": 0,
+            "shield": 0,
+            "gloves": 0,
+            "pants": 0,
+            "boots": 0
+        },
+        "archer": {
+            "necklace": 0,
+            "helmet": 0,
+            "ring": 0,
+            "weapon": 0,
+            "armour": 0,
+            "shield": 0,
+            "gloves": 0,
+            "pants": 0,
+            "boots": 0
+        }
     }
 }

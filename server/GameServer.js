@@ -11,7 +11,7 @@ const logger = require(__dirname + '/../helpers/logger.js');
 var GameServer = {
   config: {},
   db: null,
-  start: function(config, crypt, db) {
+  start: function(config, crypt, db, redisClient) {
     this.config = config;
     this.db = db;
     var gameServerThis = this;
@@ -20,7 +20,7 @@ var GameServer = {
       logger.info('Game server listening to port %s', server.address().port);
     });
     server.on('connection', function (socket) {
-      client(gameServerThis, crypt, socket);
+      client(gameServerThis, crypt, socket, redisClient);
     });
   }
 };

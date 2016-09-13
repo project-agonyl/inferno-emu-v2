@@ -4,4 +4,9 @@
 
 'use strict';
 
-module.exports = {};
+module.exports = {
+  id: null,
+  username: null,
+  characterCount: 0,
+  activeCharacterDetails: null
+};
