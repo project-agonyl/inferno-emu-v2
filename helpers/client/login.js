@@ -19,13 +19,21 @@ module.exports = function (server, socket) {
           break;
         case packet.identifier.login.len.USER_CREDENTIALS:
           var credentials = packet.helper.getParsedCredentials(data, 10, 31);
-          server.db.validateCredentials(credentials.username, credentials.password, function(rows) {
-            if (rows.length == 0) {
-              socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
-            } else {
-              socket.write(packet.helper.getServerWelcomeMessagePacket(server.config.server_name));
-            }
-          });
+		  server.db.checkMysqlServer(function(mySqlStatus){
+			if(mySqlStatus){
+				server.db.validateCredentials(credentials.username, credentials.password, function(rows) {
+					if (rows.length == 0) {
+					  socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
+					} else {
+					  socket.write(packet.helper.getServerWelcomeMessagePacket(server.config.server_name));
+					}
+			  	});
+			}
+			else
+			{
+			  socket.write(packet.helper.getPreLoginMessagePacket('Server Offline. Try Again Later.'));  	
+			}
+		  });
           break;
         default:
           console.log('Login server received unknown packet from client with length ' + data.length);
