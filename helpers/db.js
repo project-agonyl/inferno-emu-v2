@@ -22,6 +22,23 @@ module.exports = {
     this.connectionPool = mysql.createPool(config.db.mysql.connection);
     this.isPrepared = true;
   },
+  checkMysqlServer : function(onCheckCallback){
+	var query = "SELECT 1 FROM DUAL";
+	this.connectionPool.getConnection(function (err, conn) {
+		if(err){
+			onCheckCallback(false);
+		} else {
+			conn.query(query, function (qErr, res) {
+				if(qErr){
+					onCheckCallback(false);
+				}
+				else if(res.length>0){
+					onCheckCallback(true);
+				}
+			});
+		}
+	});
+  },
   validateCredentials: function (username, password, onResultCallback) {
     this.executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
       if (!err) {
