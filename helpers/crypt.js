@@ -10,8 +10,8 @@ module.exports = {
     for (var i = 12; ((i + 4) | 0) <= packet.length; i = (i + 4) | 0) {
       var DynamicKey = this.config.cryptography.dynamic_key;
       for (var j = i; j < ((i + 4) | 0); j = (j + 1) | 0) {
-          packet[j] = ((packet[j] ^ (DynamicKey >> 8))) & 255;
-          DynamicKey = ((((((packet[j] + DynamicKey) | 0)) * this.config.cryptography.constant_key_1) | 0) + this.config.cryptography.constant_key_2) | 0;
+        packet[j] = ((packet[j] ^ (DynamicKey >> 8))) & 255;
+        DynamicKey = ((((((packet[j] + DynamicKey) | 0)) * this.config.cryptography.constant_key_1) | 0) + this.config.cryptography.constant_key_2) | 0;
       }
     }
     return packet;
@@ -28,17 +28,4 @@ module.exports = {
     }
     return packet;
   }
-  // decrypt: function(packet){
-  //   for (var i = 12; i + 4 <= packet.length; i += 4)
-  //   {
-  //     var DynamicKey = this.config.cryptography.dynamic_key;
-  //     for (var j = i; j < i + 4; j++)
-  //     {
-  //       var pSrc = packet[j];
-  //       packet[j] = (packet[j] ^ (DynamicKey >> 8)),
-  //       DynamicKey = (pSrc + DynamicKey) * this.config.cryptography.constant_key_1 + this.config.cryptography.constant_key_2;
-  //     }
-  //   }
-  //   return packet;
-  // }
 };

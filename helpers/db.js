@@ -25,21 +25,18 @@ module.exports = {
   validateCredentials: function (username, password, onResultCallback) {
     this.executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
       if (!err) {
-          onResultCallback(rows);
-      }
-      else {
-          onResultCallback([]);
+        onResultCallback(rows);
+      } else {
+        onResultCallback([]);
       }
     });
   },
-  getCharacters: function(id, onResultCallback)
-  {
-    this.executeQuery("SELECT * FROM character WHERE account_id=" + id,function(err, rows){
+  getCharacters: function(id, onResultCallback) {
+    this.executeQuery("SELECT * FROM `character` WHERE account_id = " + id, function(err, rows){
       if (!err) {
-          onResultCallback(rows);
-      }
-      else {
-          onResultCallback([]);
+        onResultCallback(rows);
+      } else {
+        onResultCallback([]);
       }
     });
   },
@@ -48,13 +45,12 @@ module.exports = {
     this.connectionPool.getConnection(function (connectionError, connection) {
       if (connectionError) {
         onExecuteCallback(connectionError, result);
-      }
-      else {
+      } else {
         connection.query(query, function (queryError, rows) {
           if (queryError) {
+            logger.error(queryError);
             onExecuteCallback(queryError, result);
-          }
-          else {
+          } else {
             connection.release();
             result = rows;
             onExecuteCallback(queryError, result);
