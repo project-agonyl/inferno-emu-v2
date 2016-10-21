@@ -11,7 +11,7 @@ module.exports = {
   connectionPool: null,
   isPrepared: false,
   /**
-    * Prepares database connection pool to b e used later
+    * Prepares database connection pool to be used later
     * @param  {object} config
     */
   prepare: function (config) {
@@ -20,6 +20,11 @@ module.exports = {
     connectionConfig.connectionLimit = 100;
     connectionConfig.debug = false;
     this.connectionPool = mysql.createPool(config.db.mysql.connection);
+    this.connectionPool.query('SELECT 1 + 1 AS solution', function(err, rows, fields) {
+      if (err) {
+        throw new Error('Could not connect to MySQL database!');
+      }
+    });
     this.isPrepared = true;
   },
   validateCredentials: function (username, password, onResultCallback) {
