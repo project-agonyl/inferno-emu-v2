@@ -16,9 +16,9 @@ module.exports = function (server, crypt, socket) {
   // Data receive handler
   socket.on('data', function (data) {
     if (packet.helper.validatePacketSize(data, data.length)) {
-      var credentials = packet.helper.getParsedCredentials(data, 14, 35);
       switch (packet.helper.getGameServerPacketType(data)) {
         case packet.identifier.game.type.PREPARE_USER:
+          var credentials = packet.helper.getParsedCredentials(data, 14, 35);
           redis.isAccountLoggedIn(credentials.username, function (result) {
             if (result) {
               redis.getAccountDetails(credentials.username, function (data) {
@@ -40,6 +40,11 @@ module.exports = function (server, crypt, socket) {
           break;
         case packet.identifier.game.type.DESTROY_USER:
           redis.setAccountLoggedOut(socket.remoteAddress + ':' + socket.remotePort);
+          break;
+        case packet.identifier.game.type.SELECT_CHARACTER:
+          var charName = packet.helper.getCharacterName(crypt.decrypt(data));
+          logger.info('Selected char ' + charName);
+          socket.write(crypt.encrypt(packet.helper.getPostLoginMessagePacket('Selected character ' + charName)));
           break;
         default:
           console.log('Game server received packet from client with length ' + data.length);

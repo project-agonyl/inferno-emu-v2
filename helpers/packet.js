@@ -86,6 +86,11 @@ module.exports = {
         password: password
       };
     },
+    /**
+     * Returns whether a char is alpha numeric
+     * @param charCode
+     * @returns {boolean}
+     */
     escapeNonAlphNumeric: function (charCode) {
       if (!(charCode > 47 && charCode < 58) && // numeric (0-9)
         !(charCode > 64 && charCode < 91) && // upper alpha (A-Z)
@@ -94,6 +99,12 @@ module.exports = {
       }
       return true;
     },
+    /**
+     * Returns packet with server details
+     * @param ip
+     * @param port
+     * @returns {Buffer}
+     */
     getServerDetailsPacket: function (ip, port) {
       var packet = [0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe2, 0x11, 0x38, 0x54, 0x00];
       var toFill = 16 - ip.length;
@@ -113,9 +124,20 @@ module.exports = {
       packet.push(0x00);
       return new Buffer(packet);
     },
+    /**
+     * Validates packet size with given packet size
+     * @param packet
+     * @param length
+     * @returns {boolean}
+     */
     validatePacketSize: function (packet, length) {
       return this.intFromBytes(packet) == length;
     },
+    /**
+     * Returns integer value from reverse hex byte
+     * @param packet
+     * @returns {number}
+     */
     intFromBytes: function (packet) {
       var val = 0;
       packet = packet.slice(0, 2).reverse();
@@ -127,6 +149,11 @@ module.exports = {
       }
       return val;
     },
+    /**
+     * Returns reverse hex byte from an integer
+     * @param num
+     * @returns {Array.<*>}
+     */
     toBytesInt32: function (num) {
       var arr = [
         (num & 0xff000000) >> 24,
@@ -136,6 +163,11 @@ module.exports = {
       ];
       return arr.reverse();
     },
+    /**
+     * Returns server welcome message
+     * @param serverName
+     * @returns {Buffer}
+     */
     getServerWelcomeMessagePacket: function (serverName) {
       var packet = [0x5c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe3, 0x01];
       var welcomeMsg = "Welcome to server " + serverName;
@@ -171,6 +203,11 @@ module.exports = {
       }
       return new Buffer(packet);
     },
+    /**
+     * Returns the type of packet received by the game server
+     * @param packet
+     * @returns {string}
+     */
     getGameServerPacketType: function (packet) {
       var type = '';
       switch (packet.length) {
@@ -192,6 +229,42 @@ module.exports = {
           break;
       }
       return type;
+    },
+    /**
+     * Returns message that can be shown post login
+     * @param message
+     * @returns {Buffer}
+     */
+    getPostLoginMessagePacket: function (message) {
+      var packet = [0x4e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x03, 0xff, 0xff, 0x0f, 0x7e, 0x2f, 0x6e, 0x33];
+      if (message.length > 56) {
+        message = message.substr(0, 56);
+      }
+      for (var i = 0; i < message.length; i++) {
+        packet.push(message.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 62 - message.length; i++) {
+        packet.push(0x00);
+      }
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns character name from packet
+     * @param packet
+     * @returns {string}
+     */
+    getCharacterName: function (packet) {
+      var stringData = decoder.end(packet);
+      var temp1 = stringData.substr(12, 12).trim();
+      var charName = '';
+      for (var i = 0; i < temp1.length; i++) {
+        var code = temp1.charCodeAt(i);
+        if (!this.escapeNonAlphNumeric(code)) {
+          break;
+        }
+        charName += temp1.charAt(i);
+      }
+      return charName;
     }
   }
 };
