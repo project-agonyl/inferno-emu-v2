@@ -24,6 +24,7 @@ module.exports = {
       if (err) {
         throw new Error('Could not connect to MySQL database!');
       }
+      logger.info('Connected to MySQL database');
     });
     this.isPrepared = true;
   },

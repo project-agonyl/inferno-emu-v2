@@ -11,12 +11,12 @@ const logger = require(__dirname + '/../helpers/logger.js');
 var GameServer = {
   config: {},
   db: null,
-  start: function(config, crypt, db) {
+  start: function (config, crypt, db) {
     this.config = config;
     this.db = db;
     var gameServerThis = this;
     var server = net.createServer();
-    server.listen(config.server.game.port, function() {
+    server.listen(config.server.game.port, function () {
       logger.info('Game server listening to port %s', server.address().port);
     });
     server.on('connection', function (socket) {

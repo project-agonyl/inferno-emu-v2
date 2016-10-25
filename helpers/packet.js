@@ -7,11 +7,17 @@
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 
+const PREPARE_USER = 'prepare-user';
+const SELECT_CHARACTER = 'select-character';
+const DELETE_CHARACTER = 'delete-character';
+const DESTROY_USER = 'destroy-user';
+const WORLD_ENTER = 'world-enter';
+
 module.exports = {
   /**
-  * Identifiers are used to identify the packet received from client
-  * @type {Object}
-  */
+   * Identifiers are used to identify the packet received from client
+   * @type {Object}
+   */
   identifier: {
     login: {
       len: {
@@ -20,31 +26,32 @@ module.exports = {
       }
     },
     game: {
-      len: {
-        PREPARE_USER: 56,
-        SELECT_CHARACTER: 37,
-        DELETE_CHARACTER: 33,
-        DESTROY_USER: 12
+      type: {
+        PREPARE_USER: PREPARE_USER,
+        SELECT_CHARACTER: SELECT_CHARACTER,
+        DELETE_CHARACTER: DELETE_CHARACTER,
+        DESTROY_USER: DESTROY_USER,
+        WORLD_ENTER: WORLD_ENTER
       }
     }
   },
   helper: {
     /**
-    * Returns pre login message packet buffer
-    * @param  {string} msg The message that has to be displayed
-    * @return {Buffer}     Packet buffer
-    */
+     * Returns pre login message packet buffer
+     * @param  {string} msg The message that has to be displayed
+     * @return {Buffer}     Packet buffer
+     */
     getPreLoginMessagePacket: function (msg) {
       var packet = [0x5c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xe0, 0x01];
       if (msg.length > 70) {
-          msg = msg.substr(0, 69);
+        msg = msg.substr(0, 69);
       }
       var toFill = 92 - 11 - msg.length;
       for (var i = 0; i < msg.length; i++) {
-          packet.push(msg.charAt(i).charCodeAt(0));
+        packet.push(msg.charAt(i).charCodeAt(0));
       }
       for (var j = 0; j < toFill; j++) {
-          packet.push(0x00);
+        packet.push(0x00);
       }
       return new Buffer(packet);
     },
@@ -75,14 +82,14 @@ module.exports = {
         password += temp2.charAt(i);
       }
       return {
-          username: username,
-          password: password
+        username: username,
+        password: password
       };
     },
     escapeNonAlphNumeric: function (charCode) {
       if (!(charCode > 47 && charCode < 58) && // numeric (0-9)
-      !(charCode > 64 && charCode < 91) && // upper alpha (A-Z)
-      !(charCode > 96 && charCode < 123)) { // lower alpha (a-z)
+        !(charCode > 64 && charCode < 91) && // upper alpha (A-Z)
+        !(charCode > 96 && charCode < 123)) { // lower alpha (a-z)
         return false
       }
       return true;
@@ -106,29 +113,26 @@ module.exports = {
       packet.push(0x00);
       return new Buffer(packet);
     },
-    validatePacketSize:function(packet,length){
-      if(this.intFromBytes(packet) == length)
-        return true;
-      else
-        return false;
+    validatePacketSize: function (packet, length) {
+      return this.intFromBytes(packet) == length;
     },
-    intFromBytes:function(packet){
+    intFromBytes: function (packet) {
       var val = 0;
-      packet = packet.slice(0,2).reverse();
+      packet = packet.slice(0, 2).reverse();
       for (var i = 0; i < packet.length; ++i) {
         val += packet[i];
-        if (i < packet.length-1) {
+        if (i < packet.length - 1) {
           val = val << 8;
         }
       }
       return val;
     },
-    toBytesInt32:function(num) {
+    toBytesInt32: function (num) {
       var arr = [
-       (num & 0xff000000) >> 24,
-       (num & 0x00ff0000) >> 16,
-       (num & 0x0000ff00) >> 8,
-       (num & 0x000000ff)
+        (num & 0xff000000) >> 24,
+        (num & 0x00ff0000) >> 16,
+        (num & 0x0000ff00) >> 8,
+        (num & 0x000000ff)
       ];
       return arr.reverse();
     },
@@ -148,9 +152,9 @@ module.exports = {
         packet.push(0x00);
       }
       packet = packet.concat([
-          0x4c, 0x27, 0xd3, 0x77, 0xe4, 0x03, 0x01, 0xf5, 0x21, 0x00, 0x00, 0x00, 0x14, 0x00,
-          0x00, 0x00, 0xe4, 0x03, 0x6f, 0x00, 0x00, 0x00, 0x01, 0x4f, 0x00, 0x00, 0x01, 0xe1,
-          0x01, 0x00, 0x00
+        0x4c, 0x27, 0xd3, 0x77, 0xe4, 0x03, 0x01, 0xf5, 0x21, 0x00, 0x00, 0x00, 0x14, 0x00,
+        0x00, 0x00, 0xe4, 0x03, 0x6f, 0x00, 0x00, 0x00, 0x01, 0x4f, 0x00, 0x00, 0x01, 0xe1,
+        0x01, 0x00, 0x00
       ]);
       for (var i = 0; i < serverName.length; i++) {
         packet.push(serverName.charAt(i).charCodeAt(0));
@@ -166,6 +170,28 @@ module.exports = {
         packet.push(0x00);
       }
       return new Buffer(packet);
+    },
+    getGameServerPacketType: function (packet) {
+      var type = '';
+      switch (packet.length) {
+        case 56:
+          type = PREPARE_USER;
+          break;
+        case 12:
+          type = DESTROY_USER;
+          break;
+        case 33:
+          if (packet[8] == 0x03 && packet[9] == 0xff && packet[10] == 0x02 && packet[11] == 0xa0) {
+            type = DELETE_CHARACTER;
+          } else {
+            type = WORLD_ENTER;
+          }
+          break;
+        case 37:
+          type = SELECT_CHARACTER;
+          break;
+      }
+      return type;
     }
   }
 };

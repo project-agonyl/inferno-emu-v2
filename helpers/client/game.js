@@ -9,25 +9,37 @@ var hexy = require('hexy');
 var clients = require(__dirname + '/../clients.js');
 var logger = require(__dirname + '/../logger.js');
 var character = require(__dirname + '/../character.js');
+var redis = require(__dirname + '/../redis.js');
 var fs = require("fs");
 
 module.exports = function (server, crypt, socket) {
   // Data receive handler
   socket.on('data', function (data) {
-    if(packet.helper.validatePacketSize(data, data.length)) {
-      switch(data.length) {
-        case packet.identifier.game.len.PREPARE_USER:
-          var credentials = packet.helper.getParsedCredentials(data, 14, 35);
-          server.db.validateCredentials(credentials.username, credentials.password, function(rows) {
-            if (rows.length == 0) {
-              socket.write(packet.helper.getPreLoginMessagePacket('Invalid user ID/password!'));
-            } else {
-              server.db.getCharacters(rows[0].id, function(rows){
-                var buffer = new Buffer(character.prepareCharacterPacket(rows),'base64');
-                socket.write(crypt.encrypt(buffer));
+    if (packet.helper.validatePacketSize(data, data.length)) {
+      var credentials = packet.helper.getParsedCredentials(data, 14, 35);
+      switch (packet.helper.getGameServerPacketType(data)) {
+        case packet.identifier.game.type.PREPARE_USER:
+          redis.isAccountLoggedIn(credentials.username, function (result) {
+            if (result) {
+              redis.getAccountDetails(credentials.username, function (data) {
+                try {
+                  var details = JSON.parse(data);
+                  server.db.getCharacters(details.id, function (rows) {
+                    var buffer = new Buffer(character.prepareCharacterPacket(rows), 'base64');
+                    redis.setAccountLoggedIn(credentials.username, socket.remoteAddress + ':' + socket.remotePort, JSON.stringify(details));
+                    socket.write(crypt.encrypt(buffer));
+                  });
+                } catch (e) {
+                  logger.error(e);
+                }
               });
+            } else {
+              logger.warn(credentials.username + ' trying to bypass login!');
             }
           });
+          break;
+        case packet.identifier.game.type.DESTROY_USER:
+          redis.setAccountLoggedOut(socket.remoteAddress + ':' + socket.remotePort);
           break;
         default:
           console.log('Game server received packet from client with length ' + data.length);
@@ -39,7 +51,9 @@ module.exports = function (server, crypt, socket) {
     }
   });
   // Connection close handler
-  socket.once('close', function() {});
+  socket.once('close', function () {
+  });
   // Connection error handler
-  socket.on('error', function() {});
+  socket.on('error', function () {
+  });
 };

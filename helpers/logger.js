@@ -12,9 +12,9 @@ var logger = tracer.colorConsole({
   ],
   filters: [
     {
-      warn : colors.yellow,
+      warn: colors.yellow,
       error: colors.red.bold,
-      info : colors.green,
+      info: colors.green,
       debug: colors.cyan
     }
   ],
