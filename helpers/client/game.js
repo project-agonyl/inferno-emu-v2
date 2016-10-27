@@ -68,6 +68,28 @@ module.exports = function (server, crypt, socket) {
             }
           });
           break;
+        case packet.identifier.game.type.DELETE_CHARACTER:
+          var charName = packet.helper.getCharacterName(crypt.decrypt(data));
+          redis.getAccountFromUniqueId(socket.remoteAddress + ':' + socket.remotePort, function (username) {
+            if (username === null) {
+              socket.write(crypt.encrypt(packet.helper.getDuplicateCharacterMsg()));
+            } else {
+              server.db.canDeleteCharacter(username, charName, function (result) {
+                if (result) {
+                  server.db.deleteCharacter(charName, function (result) {
+                    if (result) {
+                      socket.write(crypt.encrypt(packet.helper.getCharacterDeleteAck(charName)));
+                    } else {
+                      socket.write(crypt.encrypt(packet.helper.getDuplicateCharacterMsg()));
+                    }
+                  });
+                } else {
+                  socket.write(crypt.encrypt(packet.helper.getDuplicateCharacterMsg()));
+                }
+              });
+            }
+          });
+          break;
         default:
           console.log('Game server received packet from client with length ' + data.length);
           console.log(hexy.hexy(data));

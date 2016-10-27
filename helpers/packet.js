@@ -538,6 +538,24 @@ module.exports = {
         packet.push(0x00);
       }
       return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns character deletion acknowledgement packet
+     * @param characterName
+     * @returns {Buffer}
+     */
+    getCharacterDeleteAck: function (characterName) {
+      var packet = [0x21, 0x00, 0x00, 0x00, 0x68, 0xaa, 0x16, 0x00, 0x03, 0xff, 0x02, 0xa0];
+      for (var i = 0; i < characterName.length; i++) {
+        packet.push(characterName.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 12 - characterName.length; i++) {
+        packet.push(0x00);
+      }
+      for (var i = 0; i < 9; i++) {
+        packet.push(0x00);
+      }
+      return new Buffer(packet, 'base64');
     }
   }
 };

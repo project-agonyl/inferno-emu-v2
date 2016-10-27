@@ -63,7 +63,7 @@ module.exports = {
     });
   },
   getCharacters: function (id, onResultCallback) {
-    executeQuery("SELECT * FROM `character` WHERE account_id = " + id, function (err, rows) {
+    executeQuery("SELECT * FROM `character` WHERE is_deleted = 0 AND account_id = " + id, function (err, rows) {
       if (!err) {
         onResultCallback(rows);
       } else {
@@ -72,7 +72,7 @@ module.exports = {
     });
   },
   canCreateCharacter: function (username, characterName, callback) {
-    executeQuery("SELECT COUNT(*) as count FROM `character` LEFT JOIN account a ON account_id = a.id WHERE a.username = " + mysql.escape(username), function (err, rows) {
+    executeQuery("SELECT COUNT(*) as count FROM `character` c LEFT JOIN account a ON c.account_id = a.id WHERE c.is_deleted = 0 AND a.username = " + mysql.escape(username), function (err, rows) {
       if (err) {
         callback(false);
       } else {
@@ -98,12 +98,10 @@ module.exports = {
     executeQuery("SELECT id FROM `account` WHERE username = " + mysql.escape(username), function (err, rows) {
       if (err) {
         callback(false);
-        logger.error(err);
       } else {
         if (rows[0] && rows[0].id) {
           executeQuery("INSERT INTO `character` (account_id, name, type, town) VALUES(" + rows[0].id + ", " + mysql.escape(name) + ", " + parseInt(type) + ", " + parseInt(town) + ")", function (ierr, irows) {
             if (ierr) {
-              logger.error(ierr);
               callback(false);
             } else {
               callback(true);
@@ -112,6 +110,29 @@ module.exports = {
         } else {
           callback(false);
         }
+      }
+    });
+  },
+  canDeleteCharacter: function (username, characterName, callback) {
+    executeQuery("SELECT COUNT(*) as count FROM `character` c LEFT JOIN account a ON c.account_id = a.id WHERE c.is_deleted = 0 AND name = " +
+      mysql.escape(characterName) + " AND a.username = " + mysql.escape(username), function (ierr, irows) {
+      if (ierr) {
+        callback(false);
+      } else {
+        if (irows[0].count > 0) {
+          callback(true);
+        } else {
+          callback(false);
+        }
+      }
+    });
+  },
+  deleteCharacter: function (characterName, callback) {
+    executeQuery("UPDATE `character` SET is_deleted = 1 WHERE name = " + mysql.escape(characterName) , function (ierr, irows) {
+      if (ierr) {
+        callback(false);
+      } else {
+        callback(true);
       }
     });
   }
