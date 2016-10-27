@@ -46,6 +46,28 @@ module.exports = function (server, crypt, socket) {
           logger.info('Selected char ' + charName);
           socket.write(crypt.encrypt(packet.helper.getPostLoginMessagePacket('Selected character ' + charName)));
           break;
+        case packet.identifier.game.type.CREATE_CHARACTER:
+          var characterDetails = packet.helper.getCharacterDetailsForCreation(crypt.decrypt(data));
+          redis.getAccountFromUniqueId(socket.remoteAddress + ':' + socket.remotePort, function (username) {
+            if (username === null) {
+              socket.write(crypt.encrypt(packet.helper.getDuplicateCharacterMsg()));
+            } else {
+              server.db.canCreateCharacter(username, characterDetails.name, function (result) {
+                if (result) {
+                  server.db.createCharacter(username, characterDetails.name, characterDetails.type, characterDetails.town, function (result) {
+                    if (result) {
+                      socket.write(crypt.encrypt(packet.helper.getCharacterCreateAck(characterDetails.name, characterDetails.type)));
+                    } else {
+                      socket.write(crypt.encrypt(packet.helper.getDuplicateCharacterMsg()));
+                    }
+                  });
+                } else {
+                  socket.write(crypt.encrypt(packet.helper.getDuplicateCharacterMsg()));
+                }
+              });
+            }
+          });
+          break;
         default:
           console.log('Game server received packet from client with length ' + data.length);
           console.log(hexy.hexy(data));

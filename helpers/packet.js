@@ -12,6 +12,8 @@ const SELECT_CHARACTER = 'select-character';
 const DELETE_CHARACTER = 'delete-character';
 const DESTROY_USER = 'destroy-user';
 const WORLD_ENTER = 'world-enter';
+const PING = 'ping';
+const CREATE_CHARACTER = 'create-character';
 
 module.exports = {
   /**
@@ -31,7 +33,9 @@ module.exports = {
         SELECT_CHARACTER: SELECT_CHARACTER,
         DELETE_CHARACTER: DELETE_CHARACTER,
         DESTROY_USER: DESTROY_USER,
-        WORLD_ENTER: WORLD_ENTER
+        WORLD_ENTER: WORLD_ENTER,
+        PING: PING,
+        CREATE_CHARACTER: CREATE_CHARACTER
       }
     }
   },
@@ -227,6 +231,12 @@ module.exports = {
         case 37:
           type = SELECT_CHARACTER;
           break;
+        case 22:
+          type = PING;
+          break;
+        case 35:
+          type = CREATE_CHARACTER;
+          break;
       }
       return type;
     },
@@ -265,6 +275,269 @@ module.exports = {
         charName += temp1.charAt(i);
       }
       return charName;
+    },
+    /**
+     * Returns character details from a character creation packet
+     * @param packet
+     * @returns {{name: string, type: *, town: *}}
+     */
+    getCharacterDetailsForCreation: function (packet) {
+      var name = '';
+      var stringPacket = decoder.end(packet);
+      var temp1 = stringPacket.substr(14, 12).trim();
+      for (var i = 0; i < temp1.length; i++) {
+        var code = temp1.charCodeAt(i);
+        if (!this.escapeNonAlphNumeric(code)) {
+          break;
+        }
+        name += temp1.charAt(i);
+      }
+      return {
+        name: name,
+        type: packet[12],
+        town: packet[13]
+      }
+    },
+    /**
+     * Returns duplicate character creation message
+     * @returns {Buffer}
+     */
+    getDuplicateCharacterMsg: function () {
+      var packet = [0x4e, 0x00, 0x00, 0x00, 0xb3, 0xaa, 0x16, 0x00, 0x03, 0xff, 0xff, 0x0f];
+      packet = packet.concat([0x04, 0x11, 0xa4, 0x77, 0xa6, 0x73, 0xa6, 0x62, 0xaa, 0xba, 0xa4, 0x48, 0xaa, 0xab, 0xa6, 0x57, 0xba, 0xd9]);
+      for (var i = 0; i < 48; i++) {
+        packet.push(0x00);
+      }
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns character creation acknowledgement packet
+     * @param characterName
+     * @param type
+     * @returns {Buffer}
+     */
+    getCharacterCreateAck: function (characterName, type) {
+      var packet = [0xc2, 0x00, 0x00, 0x00, 0x98, 0xaa, 0x16, 0x00, 0x03, 0xff, 0x01, 0xa0];
+      packet.push(parseInt(type));
+      for (var i = 0; i < characterName.length; i++) {
+        packet.push(characterName.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 12 - characterName.length; i++) {
+        packet.push(0x00);
+      }
+      switch (parseInt(type)) {
+        case 0:
+          for (var i = 0; i < 46; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x04);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x02);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xd2);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x03);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xc8);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x04);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xcd);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x05);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xdc);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x06);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xd7);
+          packet.push(0x0c);
+          break;
+        case 1:
+          for (var i = 0; i < 29; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xfa);
+          packet.push(0x0c);
+          for (var i = 0; i < 30; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xeb);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x03);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xe1);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x04);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xe6);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x05);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xf5);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x06);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xf0);
+          packet.push(0x0c);
+          break;
+        case 2:
+          for (var i = 0; i < 45; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x12);
+          packet.push(0x08);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x02);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x09);
+          packet.push(0x0d);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x03);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0xff);
+          packet.push(0x0c);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x04);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x04);
+          packet.push(0x0d);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x05);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x13);
+          packet.push(0x0d);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x06);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x0e);
+          packet.push(0x0d);
+          break;
+        case 3:
+          for (var i = 0; i < 29; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x56);
+          packet.push(0x04);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x01);
+          for (var i = 0; i < 23; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x5d);
+          packet.push(0x0e);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x03);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x49);
+          packet.push(0x0e);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x04);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x53);
+          packet.push(0x0e);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x05);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x71);
+          packet.push(0x0e);
+          for (var i = 0; i < 6; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x06);
+          for (var i = 0; i < 7; i++) {
+            packet.push(0x00);
+          }
+          packet.push(0x67);
+          packet.push(0x0e);
+          break;
+      }
+      for (var i = 0; i < 6; i++) {
+        packet.push(0x00);
+      }
+      packet.push(0x07);
+      for (var i = 0; i < 35; i++) {
+        packet.push(0x00);
+      }
+      return new Buffer(packet, 'base64');
     }
   }
 };
