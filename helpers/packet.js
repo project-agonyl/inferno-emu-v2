@@ -556,6 +556,18 @@ module.exports = {
         packet.push(0x00);
       }
       return new Buffer(packet, 'base64');
+    },
+    getPingPacket: function () {
+      var packet = [0x16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xf0, 0x00, 0x00, 0x78, 0x01];
+      var randomNumber = Math.floor((Math.random() * 65534) + 1);
+      var randomNumberString = randomNumber.toString(16);
+      while (randomNumberString.length < 4) {
+        randomNumberString = "0" + randomNumberString;
+      }
+      packet.push(parseInt(randomNumberString.substr(2, 2), 16));
+      packet.push(parseInt(randomNumberString.substr(0, 2), 16));
+      packet = packet.concat([0x09, 0x7a, 0xa4, 0xc5, 0x00, 0x00]);
+      return new Buffer(packet, 'base64');
     }
   }
 };

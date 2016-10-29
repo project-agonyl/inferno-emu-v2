@@ -12,6 +12,8 @@ var character = require(__dirname + '/../character.js');
 var redis = require(__dirname + '/../redis.js');
 var fs = require("fs");
 
+clients.startClientPing();
+
 module.exports = function (server, crypt, socket) {
   // Data receive handler
   socket.on('data', function (data) {
@@ -28,6 +30,7 @@ module.exports = function (server, crypt, socket) {
                     var buffer = new Buffer(character.prepareCharacterPacket(rows), 'base64');
                     redis.setAccountLoggedIn(credentials.username, socket.remoteAddress + ':' + socket.remotePort, JSON.stringify(details));
                     socket.write(crypt.encrypt(buffer));
+                    clients.setClient(socket.remoteAddress + ':' + socket.remotePort, socket, credentials.username);
                   });
                 } catch (e) {
                   logger.error(e);
@@ -40,6 +43,7 @@ module.exports = function (server, crypt, socket) {
           break;
         case packet.identifier.game.type.DESTROY_USER:
           redis.setAccountLoggedOut(socket.remoteAddress + ':' + socket.remotePort);
+          clients.unsetClient(socket.remoteAddress + ':' + socket.remotePort);
           break;
         case packet.identifier.game.type.SELECT_CHARACTER:
           var charName = packet.helper.getCharacterName(crypt.decrypt(data));
@@ -89,6 +93,8 @@ module.exports = function (server, crypt, socket) {
               });
             }
           });
+          break;
+        case packet.identifier.game.type.PING:
           break;
         default:
           console.log('Game server received packet from client with length ' + data.length);
