@@ -1,25 +1,25 @@
 {
-	"server": {
-		"login": {
+  "server": {
+    "login": {
       "ip": "127.0.0.1",
-			"port": 3550
-		},
-		"game": {
+      "port": 3550
+    },
+    "game": {
       "ip": "127.0.0.1",
-			"port": 9867
-		}
-	},
-	"server_name": "Inferno",
-	"db": {
-		"mysql": {
-			"connection": {
-				"host": "localhost",
-				"user": "root",
-				"password": "",
-				"database": "infernoemu"
-			}
-		}
-	},
+      "port": 9867
+    }
+  },
+  "server_name": "Inferno",
+  "db": {
+    "mysql": {
+      "connection": {
+        "host": "localhost",
+        "user": "root",
+        "password": "",
+        "database": "infernoemu"
+      }
+    }
+  },
   "cryptography": {
     "constant_key_1": 2366183,
     "constant_key_2": 1432754,

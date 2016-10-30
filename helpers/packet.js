@@ -14,6 +14,7 @@ const DESTROY_USER = 'destroy-user';
 const WORLD_ENTER = 'world-enter';
 const PING = 'ping';
 const CREATE_CHARACTER = 'create-character';
+const PAYMENT_INFO = 'payment-info';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -32,6 +33,14 @@ function getEmptyPacket(length) {
   var packet = [];
   for (var i = 0; i < length; i++) {
     packet.push(0x00);
+  }
+  return packet;
+}
+
+function getPacketFromString(str) {
+  var packet = [];
+  for (var i = 0; i < str.length; i++) {
+    packet.push(str.charAt(i).charCodeAt(0));
   }
   return packet;
 }
@@ -56,7 +65,8 @@ module.exports = {
         DESTROY_USER: DESTROY_USER,
         WORLD_ENTER: WORLD_ENTER,
         PING: PING,
-        CREATE_CHARACTER: CREATE_CHARACTER
+        CREATE_CHARACTER: CREATE_CHARACTER,
+        PAYMENT_INFO: PAYMENT_INFO
       }
     }
   },
@@ -230,6 +240,9 @@ module.exports = {
      */
     getGameServerPacketType: function (packet) {
       var type = '';
+      if (packet[10] == 0x00 && packet[11] == 0xc0) {
+        return PAYMENT_INFO;
+      }
       switch (packet.length) {
         case 56:
           type = PREPARE_USER;
@@ -668,7 +681,7 @@ module.exports = {
      * @todo Investigate what packet this is
      * @returns {Buffer}
      */
-    getPacket37: function() {
+    getPacket37: function () {
       var packet = [0x25, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x10, 0x16];
       for (var i = 0; i < 25; i++) {
         packet.push(0x00);
@@ -679,7 +692,7 @@ module.exports = {
      * @todo Investigate what packet this is
      * @returns {Buffer}
      */
-    getPacket25: function() {
+    getPacket25: function () {
       var packet = [0x19, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x61, 0x14];
       for (var i = 0; i < 13; i++) {
         packet.push(0x00);
@@ -687,12 +700,87 @@ module.exports = {
       return new Buffer(packet, 'base64');
     },
     /**
-     * @todo Investigate what packet this is as it seems hardcoded
+     * Until this packet is sent, chats sent to the character are not shown in chat panel
      * @returns {Buffer}
      */
-    getPacket18: function() {
-      var packet = [0x12, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x3, 0x18];
+    getDisplayWhisperInChatboxPacket: function () {
+      var packet = [0x12, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x03, 0x18];
       packet = packet.concat([0xff, 0x00, 0x1f, 0x00, 0xe3, 0x00]);
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns whisper packet
+     * @param sender
+     * @param message
+     * @returns {Buffer}
+     */
+    getWhisperPacket: function (sender, message) {
+      var packet = [0x66, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x18];
+      packet.push(0x03);
+      packet.push(0x67);
+      packet = packet.concat(getEmptyPacket(3));
+      packet = packet.concat(getPacketFromString(sender));
+      packet = packet.concat(getEmptyPacket(20 - sender.length));
+      packet.push(0x00);
+      packet = packet.concat(getPacketFromString(message));
+      packet = packet.concat(getEmptyPacket(60 - message.length));
+      packet = packet.concat(getEmptyPacket(4));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns packet that will display message in the top bar where usually ping is shown
+     * @param message
+     * @returns {Buffer}
+     */
+    getTopMessageBarPacket: function (message) {
+      var packet = [0x6e, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x18];
+      packet.push(0x0c);
+      packet.push(0xff);
+      packet.push(0xff);
+      packet.push(0xff);
+      packet.push(0xff);
+      packet = packet.concat(getPacketFromString('NOTICE'));
+      packet = packet.concat(getEmptyPacket(20 - 'NOTICE'.length));
+      packet.push(0x00);
+      packet = packet.concat(getPacketFromString(message));
+      packet = packet.concat(getEmptyPacket(70 - message.length));
+      packet = packet.concat(getEmptyPacket(2));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns packet that will display server announcements
+     * @param message
+     * @returns {Buffer}
+     */
+    getAnnouncementPacket: function (message) {
+      var packet = [0x6e, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x18];
+      packet.push(0x00);
+      packet.push(0xff);
+      packet.push(0xff);
+      packet.push(0xff);
+      packet.push(0xff);
+      packet = packet.concat(getPacketFromString('NOTICE'));
+      packet = packet.concat(getEmptyPacket(20 - 'NOTICE'.length));
+      packet.push(0x00);
+      packet = packet.concat(getPacketFromString(message));
+      packet = packet.concat(getEmptyPacket(70 - message.length));
+      packet = packet.concat(getEmptyPacket(2));
+      return new Buffer(packet, 'base64');
+    },
+    getSmMsgPacket: function (sender, message) {
+      var packet = [0x80, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x50];
+      packet = packet.concat(getEmptyPacket(8));
+      packet = packet.concat(getPacketFromString(sender));
+      packet = packet.concat(getEmptyPacket(20 - sender.length));
+      packet = packet.concat(getEmptyPacket(9));
+      for (var i = 0; i < 2; i++) {
+        packet = packet.concat(getPacketFromString(message));
+        packet = packet.concat(getEmptyPacket(20 - message.length));
+        packet = packet.concat(getEmptyPacket(9));
+      }
+      packet = packet.concat(getPacketFromString(message));
+      packet = packet.concat(getEmptyPacket(20 - message.length));
+      packet.push(0x00);
       return new Buffer(packet, 'base64');
     }
   }

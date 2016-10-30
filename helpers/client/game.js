@@ -107,12 +107,17 @@ module.exports = function (server, crypt, socket) {
           break;
         case packet.identifier.game.type.PING:
           break;
+        case packet.identifier.game.type.PAYMENT_INFO:
+          socket.write(crypt.encrypt(packet.helper.getAnnouncementPacket(server.config['server_name'] + ' is a free to play server!')));
+          break;
         case packet.identifier.game.type.WORLD_ENTER:
           var client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
-          socket.write(crypt.encrypt(packet.helper.getCharacterWorldEnterPacket(client.characterDetails)));
-          //socket.write(crypt.encrypt(packet.helper.getPacket37()));
-          //socket.write(crypt.encrypt(packet.helper.getPacket25()));
-          //socket.write(crypt.encrypt(packet.helper.getPacket18()));
+          socket.write(crypt.encrypt(packet.helper.getCharacterWorldEnterPacket(client.characterDetails)), function () {
+            socket.write(crypt.encrypt(packet.helper.getDisplayWhisperInChatboxPacket()));
+            socket.write(crypt.encrypt(packet.helper.getWhisperPacket('Server-Message', 'Thank you for trying inferno emulator')));
+            socket.write(crypt.encrypt(packet.helper.getTopMessageBarPacket('Welcome to Inferno A3 Emulator')));
+            socket.write(crypt.encrypt(packet.helper.getAnnouncementPacket('Inferno emulator is under active development')));
+          });
           break;
         default:
           console.log('Game server received packet from client with length ' + data.length);
