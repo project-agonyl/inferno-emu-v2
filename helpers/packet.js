@@ -634,9 +634,10 @@ module.exports = {
       for (var i = 0; i < 12 - characterDetails.name.length; i++) {
         packet.push(0x00);
       }
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < 9; i++) {
         packet.push(0x00);
       }
+      packet.push(parseInt(characterDetails.type));
       packet = packet.concat(getReverseHexPacket(characterDetails.level, 4));
       packet = packet.concat(getReverseHexPacket(characterDetails.experience, 8));
       packet = packet.concat(getReverseHexPacket(characterDetails['map_id'], 4));

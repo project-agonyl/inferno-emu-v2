@@ -100,7 +100,18 @@ module.exports = {
         callback(false);
       } else {
         if (rows[0] && rows[0].id) {
-          executeQuery("INSERT INTO `character` (account_id, name, type, town) VALUES(" + rows[0].id + ", " + mysql.escape(name) + ", " + parseInt(type) + ", " + parseInt(town) + ")", function (ierr, irows) {
+          var map_id, x, y;
+          if (town == 1) {
+            map_id = 7;
+            x = 94;
+            y = 127;
+          } else {
+            map_id = 1;
+            x = 124;
+            y = 139;
+          }
+          executeQuery("INSERT INTO `character` (account_id, name, type, town, map_id, location_x, location_y) VALUES("
+            + rows[0].id + ", " + mysql.escape(name) + ", " + parseInt(type) + ", " + parseInt(town) + ", " + map_id + ", " + x + ", " + y + ")", function (ierr, irows) {
             if (ierr) {
               callback(false);
             } else {
