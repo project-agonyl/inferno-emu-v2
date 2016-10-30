@@ -17,6 +17,7 @@ clients.startClientPing();
 module.exports = function (server, crypt, socket) {
   // Data receive handler
   socket.on('data', function (data) {
+    logger.info('Received packet with length ' + data.length);
     if (packet.helper.validatePacketSize(data, data.length)) {
       switch (packet.helper.getGameServerPacketType(data)) {
         case packet.identifier.game.type.PREPARE_USER:
@@ -47,8 +48,18 @@ module.exports = function (server, crypt, socket) {
           break;
         case packet.identifier.game.type.SELECT_CHARACTER:
           var charName = packet.helper.getCharacterName(crypt.decrypt(data));
-          logger.info('Selected char ' + charName);
-          socket.write(crypt.encrypt(packet.helper.getPostLoginMessagePacket('Selected character ' + charName)));
+          var client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+          server.db.hasCharacter(client.username, charName, function (result) {
+            if (result) {
+              clients.setClientCharacter(socket.remoteAddress + ':' + socket.remotePort, charName);
+              server.db.getCharacterDetails(client.characterName, function (rows) {
+                if (rows.length !== 0) {
+                  clients.setClientCharacterDetails(socket.remoteAddress + ':' + socket.remotePort, rows[0]);
+                  socket.write(crypt.encrypt(packet.helper.getCharacterMapPacket(charName, rows[0]['map_id'])));
+                }
+              });
+            }
+          });
           break;
         case packet.identifier.game.type.CREATE_CHARACTER:
           var characterDetails = packet.helper.getCharacterDetailsForCreation(crypt.decrypt(data));
@@ -78,7 +89,7 @@ module.exports = function (server, crypt, socket) {
             if (username === null) {
               socket.write(crypt.encrypt(packet.helper.getDuplicateCharacterMsg()));
             } else {
-              server.db.canDeleteCharacter(username, charName, function (result) {
+              server.db.hasCharacter(username, charName, function (result) {
                 if (result) {
                   server.db.deleteCharacter(charName, function (result) {
                     if (result) {
@@ -96,12 +107,20 @@ module.exports = function (server, crypt, socket) {
           break;
         case packet.identifier.game.type.PING:
           break;
+        case packet.identifier.game.type.WORLD_ENTER:
+          var client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+          socket.write(crypt.encrypt(packet.helper.getCharacterWorldEnterPacket(client.characterDetails)));
+          //socket.write(crypt.encrypt(packet.helper.getPacket37()));
+          //socket.write(crypt.encrypt(packet.helper.getPacket25()));
+          //socket.write(crypt.encrypt(packet.helper.getPacket18()));
+          break;
         default:
           console.log('Game server received packet from client with length ' + data.length);
           console.log(hexy.hexy(data));
           break;
       }
     } else {
+      console.log(hexy.hexy(data));
       logger.debug("Packet size doesn't match with actual size of packet");
     }
   });

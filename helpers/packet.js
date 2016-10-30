@@ -15,6 +15,27 @@ const WORLD_ENTER = 'world-enter';
 const PING = 'ping';
 const CREATE_CHARACTER = 'create-character';
 
+function getReverseHexPacket(number, length) {
+  number = parseInt(number);
+  var reverseHexPacket = [];
+  var hexString = number.toString(16);
+  while (hexString.length < length) {
+    hexString = "0" + hexString;
+  }
+  for (var i = length - 2; i >= 0; i = i - 2) {
+    reverseHexPacket.push(parseInt(hexString.substr(i, 2), 16));
+  }
+  return reverseHexPacket;
+}
+
+function getEmptyPacket(length) {
+  var packet = [];
+  for (var i = 0; i < length; i++) {
+    packet.push(0x00);
+  }
+  return packet;
+}
+
 module.exports = {
   /**
    * Identifiers are used to identify the packet received from client
@@ -118,12 +139,7 @@ module.exports = {
       for (var j = 0; j < toFill; j++) {
         packet.push(0x00);
       }
-      var portHexString = port.toString(16);
-      while (portHexString.length < 4) {
-        portHexString = "0" + portHexString;
-      }
-      packet.push(parseInt(portHexString.substr(2, 2), 16));
-      packet.push(parseInt(portHexString.substr(0, 2), 16));
+      packet = packet.concat(getReverseHexPacket(port, 4));
       packet.push(0x00);
       packet.push(0x00);
       return new Buffer(packet);
@@ -557,16 +573,126 @@ module.exports = {
       }
       return new Buffer(packet, 'base64');
     },
+    /**
+     * Returns ping packet
+     * @returns {Buffer}
+     */
     getPingPacket: function () {
       var packet = [0x16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xf0, 0x00, 0x00, 0x78, 0x01];
       var randomNumber = Math.floor((Math.random() * 65534) + 1);
-      var randomNumberString = randomNumber.toString(16);
-      while (randomNumberString.length < 4) {
-        randomNumberString = "0" + randomNumberString;
-      }
-      packet.push(parseInt(randomNumberString.substr(2, 2), 16));
-      packet.push(parseInt(randomNumberString.substr(0, 2), 16));
+      packet = packet.concat(getReverseHexPacket(randomNumber, 4));
       packet = packet.concat([0x09, 0x7a, 0xa4, 0xc5, 0x00, 0x00]);
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns character map packet
+     * @param characterName
+     * @param map
+     * @returns {Buffer}
+     */
+    getCharacterMapPacket: function (characterName, map) {
+      var packet = [0x27, 0x00, 0x00, 0x00, 0x81, 0xb1, 0x16, 0x00, 0x03, 0xff, 0x06, 0x11];
+      for (var i = 0; i < characterName.length; i++) {
+        packet.push(characterName.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 12 - characterName.length; i++) {
+        packet.push(0x00);
+      }
+      for (var i = 0; i < 9; i++) {
+        packet.push(0x00);
+      }
+      var randomNumber = Math.floor((Math.random() * 65534) + 1);
+      packet = packet.concat(getReverseHexPacket(randomNumber, 4));
+      packet.push(0x16);
+      packet.push(0x00);
+      packet = packet.concat(getReverseHexPacket(map, 4));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns character world enter packet
+     * @param characterDetails
+     * @returns {Buffer}
+     */
+    getCharacterWorldEnterPacket: function (characterDetails) {
+      var packet = [0x2c, 0x04, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x07, 0x11];
+      for (var i = 0; i < characterDetails.name.length; i++) {
+        packet.push(characterDetails.name.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 12 - characterDetails.name.length; i++) {
+        packet.push(0x00);
+      }
+      for (var i = 0; i < 10; i++) {
+        packet.push(0x00);
+      }
+      packet = packet.concat(getReverseHexPacket(characterDetails.level, 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.experience, 8));
+      packet = packet.concat(getReverseHexPacket(characterDetails['map_id'], 4));
+      packet.push(0x00);
+      packet.push(0x00);
+      packet.push(parseInt(characterDetails['location_x']));
+      packet.push(parseInt(characterDetails['location_y']));
+      packet.push(0x00);
+      packet.push(0x00);
+      for (var i = 0; i < 28; i++) { //@todo Find out how skills are to be sent and remove 0s
+        packet.push(0x00);
+      }
+      packet = packet.concat(getReverseHexPacket(characterDetails.town, 4));
+      packet.push(0x00);
+      packet.push(0x00);
+      packet = packet.concat(getReverseHexPacket(characterDetails.woonz, 8));
+      packet = packet.concat(getReverseHexPacket(characterDetails['current_hp_charge'], 8));
+      packet = packet.concat(getReverseHexPacket(characterDetails['current_mp_charge'], 8));
+      packet = packet.concat(getReverseHexPacket(characterDetails['lore_points'], 8));
+      packet = packet.concat(getReverseHexPacket(characterDetails['remaining_skill_points'], 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.strength, 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.intelligence, 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.dexerity, 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.vitality, 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.mana, 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_hp_charge'], 8));
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_mp_charge'], 8));
+      packet = packet.concat(getReverseHexPacket(characterDetails['current_hp'], 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails['current_mp'], 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.attack, 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails['magic_attack'], 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails.defense, 4));
+      for (var i = 0; i < 12; i++) { //@todo No idea what it is (probably equipped shue)
+        packet.push(0x00);
+      }
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_hp'], 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_mp'], 4));
+      packet = packet.concat(getEmptyPacket(1068 - packet.length)); //@todo Find more info on wear etc
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * @todo Investigate what packet this is
+     * @returns {Buffer}
+     */
+    getPacket37: function() {
+      var packet = [0x25, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x10, 0x16];
+      for (var i = 0; i < 25; i++) {
+        packet.push(0x00);
+      }
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * @todo Investigate what packet this is
+     * @returns {Buffer}
+     */
+    getPacket25: function() {
+      var packet = [0x19, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x61, 0x14];
+      for (var i = 0; i < 13; i++) {
+        packet.push(0x00);
+      }
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * @todo Investigate what packet this is as it seems hardcoded
+     * @returns {Buffer}
+     */
+    getPacket18: function() {
+      var packet = [0x12, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x3, 0x18];
+      packet = packet.concat([0xff, 0x00, 0x1f, 0x00, 0xe3, 0x00]);
       return new Buffer(packet, 'base64');
     }
   }

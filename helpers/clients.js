@@ -7,7 +7,7 @@
 var Client = require('./client.js');
 var packet = require('./packet.js');
 var crypt = require('./crypt.js');
-var clients = [];
+var clients = {};
 var clientPing;
 
 module.exports = {
@@ -30,6 +30,11 @@ module.exports = {
   setClientCharacter: function (id, characterName) {
     if (clients.hasOwnProperty(id)) {
       clients[id].characterName = characterName;
+    }
+  },
+  setClientCharacterDetails: function (id, characterDetails) {
+    if (clients.hasOwnProperty(id)) {
+      clients[id].characterDetails = characterDetails;
     }
   },
   startClientPing: function () {

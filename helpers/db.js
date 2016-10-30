@@ -113,7 +113,7 @@ module.exports = {
       }
     });
   },
-  canDeleteCharacter: function (username, characterName, callback) {
+  hasCharacter: function (username, characterName, callback) {
     executeQuery("SELECT COUNT(*) as count FROM `character` c LEFT JOIN account a ON c.account_id = a.id WHERE c.is_deleted = 0 AND name = " +
       mysql.escape(characterName) + " AND a.username = " + mysql.escape(username), function (ierr, irows) {
       if (ierr) {
@@ -133,6 +133,15 @@ module.exports = {
         callback(false);
       } else {
         callback(true);
+      }
+    });
+  },
+  getCharacterDetails: function (characterName, callback) {
+    executeQuery("SELECT * FROM `character` WHERE is_deleted = 0 AND name = " + mysql.escape(characterName), function (err, rows) {
+      if (!err) {
+        callback(rows);
+      } else {
+        callback([]);
       }
     });
   }

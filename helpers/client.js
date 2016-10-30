@@ -11,6 +11,7 @@ function Client(id, socket, username) {
   this.socket = socket;
   this.username = username;
   this.characterName = '';
+  this.characterDetails = {};
 }
 
 // export the class
