@@ -20,3 +20,7 @@ Running the Project
 3. Import database schema from ``data/db.sql`` into your emulator database
 4. Insert example data to test from ``data/seed.sql`` if necessary
 5. Run the command ``node main`` to start the server
+
+Client
+------
+Emulator has been tested with A3 client version 562. Other client versions may not work!
