@@ -155,5 +155,9 @@ module.exports = {
         callback([]);
       }
     });
+  },
+  savedUpdatedCharacterDetails: function (details) {
+    executeQuery("UPDATE `character` SET map_id = " + details['map_id'] + ", location_x = " + details['location_x']
+      + ", location_y = " + details['location_y'] + " WHERE name = " + mysql.escape(details.name), function () {});
   }
 };

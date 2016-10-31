@@ -16,9 +16,7 @@ module.exports = {
   },
   unsetClient: function (id) {
     if (clients.hasOwnProperty(id)) {
-      var client = clients[id];
       delete clients[id];
-      return client;
     }
   },
   getClient: function (id) {
@@ -35,6 +33,12 @@ module.exports = {
   setClientCharacterDetails: function (id, characterDetails) {
     if (clients.hasOwnProperty(id)) {
       clients[id].characterDetails = characterDetails;
+    }
+  },
+  setClientCharacterLocation: function (id, x, y) {
+    if (clients.hasOwnProperty(id)) {
+      clients[id].characterDetails['location_x'] = parseInt(x);
+      clients[id].characterDetails['location_y'] = parseInt(y);
     }
   },
   startClientPing: function () {

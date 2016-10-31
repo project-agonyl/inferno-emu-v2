@@ -15,6 +15,8 @@ const WORLD_ENTER = 'world-enter';
 const PING = 'ping';
 const CREATE_CHARACTER = 'create-character';
 const PAYMENT_INFO = 'payment-info';
+const CAN_MOVE_CHARACTER = 'can-move-character';
+const MOVED_CHARACTER = 'moved-character';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -66,7 +68,9 @@ module.exports = {
         WORLD_ENTER: WORLD_ENTER,
         PING: PING,
         CREATE_CHARACTER: CREATE_CHARACTER,
-        PAYMENT_INFO: PAYMENT_INFO
+        PAYMENT_INFO: PAYMENT_INFO,
+        CAN_MOVE_CHARACTER: CAN_MOVE_CHARACTER,
+        MOVED_CHARACTER: MOVED_CHARACTER
       }
     }
   },
@@ -248,10 +252,12 @@ module.exports = {
           type = PREPARE_USER;
           break;
         case 12:
-          type = DESTROY_USER;
+          if (packet[10] == 0x08 && packet[11] == 0x11) {
+            type = DESTROY_USER;
+          }
           break;
         case 33:
-          if (packet[8] == 0x03 && packet[9] == 0xff && packet[10] == 0x02 && packet[11] == 0xa0) {
+          if (packet[10] == 0x02 && packet[11] == 0xa0) {
             type = DELETE_CHARACTER;
           } else {
             type = WORLD_ENTER;
@@ -265,6 +271,13 @@ module.exports = {
           break;
         case 35:
           type = CREATE_CHARACTER;
+          break;
+        case 17:
+          if (packet[10] == 0x00 && packet[11] == 0x12) {
+            type = CAN_MOVE_CHARACTER;
+          } else if (packet[10] == 0x02 && packet[11] == 0x12) {
+            type = MOVED_CHARACTER;
+          }
           break;
       }
       return type;
@@ -690,6 +703,27 @@ module.exports = {
       return new Buffer(packet, 'base64');
     },
     /**
+     * @todo Investigate what packet this is (Most probably A3Friend list helper packet to be sent after sending friends list)
+     * @returns {Buffer}
+     */
+    getPacket36: function (characterName) {
+      var packet = [0x24, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x32, 0x23];
+      packet.push(0x00);
+      packet.push(0xcc);
+      packet.push(0x01);
+      for (var i = 0; i < characterName.length; i++) {
+        packet.push(characterName.charAt(i).charCodeAt(0));
+      }
+      for (var i = 0; i < 12 - characterName.length; i++) {
+        packet.push(0x00);
+      }
+      packet.push(0x00);
+      for (var i = 0; i < 8; i++) {
+        packet.push(0xcc);
+      }
+      return new Buffer(packet, 'base64');
+    },
+    /**
      * @todo Investigate what packet this is
      * @returns {Buffer}
      */
@@ -710,16 +744,28 @@ module.exports = {
       return new Buffer(packet, 'base64');
     },
     /**
-     * Returns whisper packet
+     * Returns chat packet
      * @param sender
      * @param message
      * @returns {Buffer}
+     * @param type
      */
-    getWhisperPacket: function (sender, message) {
+    getChatPacket: function (sender, message, type) {
       var packet = [0x66, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x18];
-      packet.push(0x03);
-      packet.push(0x67);
-      packet = packet.concat(getEmptyPacket(3));
+      switch (type) {
+        case 'whisper':
+          packet.push(0x03);
+          packet.push(0x67);
+          packet = packet.concat(getEmptyPacket(3));
+          break;
+        case 'shout':
+          packet.push(0xf1);
+          packet.push(0x1e);
+          packet.push(0xb9);
+          packet.push(0x16);
+          packet.push(0x00);
+          break;
+      }
       packet = packet.concat(getPacketFromString(sender));
       packet = packet.concat(getEmptyPacket(20 - sender.length));
       packet.push(0x00);
@@ -782,6 +828,33 @@ module.exports = {
       packet = packet.concat(getPacketFromString(message));
       packet = packet.concat(getEmptyPacket(20 - message.length));
       packet.push(0x00);
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns friends list packet
+     * @todo Populate with actual friends list
+     * @returns {Buffer}
+     */
+    getFriendListPacket: function () {
+      var packet = [0x5d, 0x05, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x31, 0x23];
+      packet = packet.concat(getPacketFromString('A3Friend'));
+      packet = packet.concat(getEmptyPacket(500));
+      packet = packet.concat(getEmptyPacket(500));
+      packet = packet.concat(getEmptyPacket(1373 - packet.length));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns character move acknowledgement packet
+     * @param data
+     * @returns {Buffer}
+     */
+    getMoveAckPacket: function (data) {
+      var packet = [0x12, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x12];
+      packet.push(0x01);
+      packet.push(data[12]);
+      packet.push(data[13]);
+      packet = packet.concat(getEmptyPacket(2));
+      packet.push(0x01);
       return new Buffer(packet, 'base64');
     }
   }

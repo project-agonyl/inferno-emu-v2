@@ -11,13 +11,13 @@ var logger = require(__dirname + '/../logger.js');
 var character = require(__dirname + '/../character.js');
 var redis = require(__dirname + '/../redis.js');
 var fs = require("fs");
+var map = require(__dirname + '/../map.js');
 
 clients.startClientPing();
 
 module.exports = function (server, crypt, socket) {
   // Data receive handler
   socket.on('data', function (data) {
-    logger.info('Received packet with length ' + data.length);
     if (packet.helper.validatePacketSize(data, data.length)) {
       switch (packet.helper.getGameServerPacketType(data)) {
         case packet.identifier.game.type.PREPARE_USER:
@@ -44,7 +44,9 @@ module.exports = function (server, crypt, socket) {
           break;
         case packet.identifier.game.type.DESTROY_USER:
           redis.setAccountLoggedOut(socket.remoteAddress + ':' + socket.remotePort);
+          var client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
           clients.unsetClient(socket.remoteAddress + ':' + socket.remotePort);
+          server.db.savedUpdatedCharacterDetails(client.characterDetails);
           break;
         case packet.identifier.game.type.SELECT_CHARACTER:
           var charName = packet.helper.getCharacterName(crypt.decrypt(data));
@@ -107,26 +109,45 @@ module.exports = function (server, crypt, socket) {
           break;
         case packet.identifier.game.type.PING:
           break;
+        case packet.identifier.game.type.CAN_MOVE_CHARACTER:
+          var client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+          var decryptedData = crypt.decrypt(data);
+          map.canMove(client.characterDetails, decryptedData[12], decryptedData[13], function (result) {
+            if (result) {
+              socket.write(crypt.encrypt(packet.helper.getMoveAckPacket(decryptedData)));
+            }
+          });
+          break;
+        case packet.identifier.game.type.MOVED_CHARACTER:
+          var decryptedData = crypt.decrypt(data);
+          clients.setClientCharacterLocation(socket.remoteAddress + ':' + socket.remotePort, decryptedData[12], decryptedData[13]);
+          break;
         case packet.identifier.game.type.PAYMENT_INFO:
           socket.write(crypt.encrypt(packet.helper.getAnnouncementPacket(server.config['server_name'] + ' is a free to play server!')));
           break;
         case packet.identifier.game.type.WORLD_ENTER:
           var client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
           socket.write(crypt.encrypt(packet.helper.getCharacterWorldEnterPacket(client.characterDetails)), function () {
+            socket.write(crypt.encrypt(packet.helper.getPacket37()));
+            socket.write(crypt.encrypt(packet.helper.getPacket25()));
             socket.write(crypt.encrypt(packet.helper.getDisplayWhisperInChatboxPacket()));
-            socket.write(crypt.encrypt(packet.helper.getWhisperPacket('Server-Message', 'Thank you for trying inferno emulator')));
+            socket.write(crypt.encrypt(packet.helper.getChatPacket('Server-Message', 'Thank you for trying inferno emulator', 'shout')));
             socket.write(crypt.encrypt(packet.helper.getTopMessageBarPacket('Welcome to Inferno A3 Emulator')));
             socket.write(crypt.encrypt(packet.helper.getAnnouncementPacket('Inferno emulator is under active development')));
+            socket.write(crypt.encrypt(packet.helper.getFriendListPacket()), function() {
+              socket.write(crypt.encrypt(packet.helper.getPacket36(client.characterName)));
+            });
           });
           break;
         default:
-          console.log('Game server received packet from client with length ' + data.length);
+          logger.debug('Game server received packet from client with length ' + data.length);
           console.log(hexy.hexy(data));
           break;
       }
     } else {
-      console.log(hexy.hexy(data));
+      logger.debug('Game server received packet from client with length ' + data.length);
       logger.debug("Packet size doesn't match with actual size of packet");
+      console.log(hexy.hexy(data));
     }
   });
   // Connection close handler
