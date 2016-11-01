@@ -20,7 +20,10 @@ module.exports = {
     }
   },
   getClient: function (id) {
-    return clients[id];
+    if (clients.hasOwnProperty(id)) {
+      return clients[id];
+    }
+    return null;
   },
   getClients: function () {
     return clients;

@@ -856,6 +856,22 @@ module.exports = {
       packet = packet.concat(getEmptyPacket(2));
       packet.push(0x01);
       return new Buffer(packet, 'base64');
+    },
+    getNpcPacket: function (npcId, npcLocation, npcDirection) {
+      var packet = [0x4c, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x13];
+      packet = packet.concat(npcId); //NPC ID
+      packet = packet.concat(getReverseHexPacket(Math.floor((Math.random() * 65534) + 1), 4)); // Maybe random number
+      packet = packet.concat([0xf8, 0x2f, 0x20, 0xa1, 0x07]); // Constant
+      packet = packet.concat(getEmptyPacket(5));
+      packet = packet.concat(npcLocation); //NPC location
+      packet = packet.concat(getEmptyPacket(2));
+      packet = packet.concat(npcDirection); // NPC direction
+      packet = packet.concat(getEmptyPacket(4));
+      for (var i = 0; i < 10; i++) {
+        packet = packet.concat([0xff, 0xcd, 0x00]);
+      }
+      packet = packet.concat(getEmptyPacket(10));
+      return new Buffer(packet, 'base64');
     }
   }
 };
