@@ -1,3 +1,7 @@
+/**
+ * config.js - Loads configuration
+ */
+
 const _ = require('lodash');
 
 var config,

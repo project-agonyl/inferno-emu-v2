@@ -1,4 +1,4 @@
-/*
+/**
  * client.js - Class which holds data of a single client
  * Reference: http://book.mixu.net/node/ch6.html
  */

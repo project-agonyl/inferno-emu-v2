@@ -1,28 +1,20 @@
-/*
+/**
  * LoginServer.js - Login server of the emulator
  */
 
 'use strict';
 
-const net = require('net');
-const client = require(__dirname + '/../helpers/client/login.js');
-const logger = require(__dirname + '/../helpers/logger.js');
+var net = require('net');
+var handler = require(__dirname + '/../handler/login.js');
+var logger = require(__dirname + '/../helpers/logger.js');
+var config = require(__dirname + '/../config/config.js');
+var db = require(__dirname + '/../helpers/db.js');
 
-var LoginServer = {
-  config: {},
-  db: null,
-  start: function (config, db) {
-    this.config = config;
-    this.db = db;
-    var loginServerThis = this;
-    var server = net.createServer();
-    server.listen(config.server.login.port, function () {
-      logger.info('Login server listening to port %s', server.address().port);
-    });
-    server.on('connection', function (socket) {
-      client(loginServerThis, socket);
-    });
-  }
-};
+var server = net.createServer();
+server.listen({host: config.server.login.ip, port: config.server.login.port}, function () {
+  logger.info('Login server listening to port %s', server.address().port);
+});
 
-module.exports = LoginServer;
+server.on('connection', function (socket) {
+  handler(socket);
+});

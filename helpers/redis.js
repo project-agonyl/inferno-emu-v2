@@ -1,4 +1,4 @@
-/*
+/**
  * redis.js - Redis helper module
  */
 

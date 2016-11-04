@@ -6,8 +6,22 @@
 
 var mysql = require('mysql');
 var logger = require('./logger.js');
+var config = require('./../config/config.js');
 var connectionPool = null;
 var isPrepared = false;
+var connectionConfig = config.db.mysql.connection;
+
+logger.info('Preparing MySQL database connection');
+connectionConfig.connectionLimit = 100;
+connectionConfig.debug = false;
+connectionPool = mysql.createPool(config.db.mysql.connection);
+connectionPool.query('SELECT 1 + 1 AS solution', function (err, rows, fields) {
+  if (err) {
+    throw new Error('Could not connect to MySQL database!');
+  }
+  logger.info('Connected to MySQL database');
+});
+isPrepared = true;
 
 function executeQuery(query, callback) {
   var result = null;
@@ -35,24 +49,6 @@ function executeQuery(query, callback) {
 }
 
 module.exports = {
-  /**
-   * Prepares database connection pool to be used later
-   * @param  {object} config
-   */
-  prepare: function (config) {
-    logger.info('Preparing database connection');
-    var connectionConfig = config.db.mysql.connection;
-    connectionConfig.connectionLimit = 100;
-    connectionConfig.debug = false;
-    connectionPool = mysql.createPool(config.db.mysql.connection);
-    connectionPool.query('SELECT 1 + 1 AS solution', function (err, rows, fields) {
-      if (err) {
-        throw new Error('Could not connect to MySQL database!');
-      }
-      logger.info('Connected to MySQL database');
-    });
-    isPrepared = true;
-  },
   validateCredentials: function (username, password, onResultCallback) {
     executeQuery("SELECT * FROM account WHERE username = " + mysql.escape(username) + " AND password = " + mysql.escape(password), function (err, rows) {
       if (!err) {

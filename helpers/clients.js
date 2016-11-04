@@ -1,4 +1,4 @@
-/*
+/**
  * clients.js - Holds all currently connected client data
  */
 

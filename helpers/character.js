@@ -1,4 +1,4 @@
-/*
+/**
  * character.js - Character manipulation helper module
  */
 
@@ -47,6 +47,10 @@ module.exports = {
       charPacket.push(charType);
       charPacket.push(charTown);
       charPacket = charPacket.concat(packet.helper.toBytesInt32(charLevel));
+      charPacket.push(0x00);
+      charPacket.push(0x00);
+      charPacket.push(0x00);
+      charPacket.push(0x00);
       var packetLength = charPacket.length;
       for (var i = 0; i < 188 - packetLength; i++) {
         charPacket.push(0x00);

@@ -1,3 +1,7 @@
+/**
+ * logger.js - Logging helper
+ */
+
 var fs = require('fs'),
   colors = require('colors'),
   cluster = require('cluster'),

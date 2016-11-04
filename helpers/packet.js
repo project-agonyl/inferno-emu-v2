@@ -857,6 +857,13 @@ module.exports = {
       packet.push(0x01);
       return new Buffer(packet, 'base64');
     },
+    /**
+     * Returns NPC display packet
+     * @param npcId
+     * @param npcLocation
+     * @param npcDirection
+     * @returns {Buffer}
+     */
     getNpcPacket: function (npcId, npcLocation, npcDirection) {
       var packet = [0x4c, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x13];
       packet = packet.concat(npcId); //NPC ID
@@ -871,6 +878,14 @@ module.exports = {
         packet = packet.concat([0xff, 0xcd, 0x00]);
       }
       packet = packet.concat(getEmptyPacket(10));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns logout packet
+     * @returns {Buffer}
+     */
+    getDestroyPacket: function () {
+      var packet = [0x0c, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x08, 0x11];
       return new Buffer(packet, 'base64');
     }
   }

@@ -1,4 +1,4 @@
-/*
+/**
  * map.js - Map helper module
  */
 
