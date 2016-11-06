@@ -47,6 +47,30 @@ function getPacketFromString(str) {
   return packet;
 }
 
+function getIntFromReverseHex(data) {
+  var hexString = '';
+  for (var i = data.length - 1; i >= 0; i--) {
+    var temp = data[i].toString(16);
+    if (temp.length !== 2) {
+      temp = '0' + temp;
+    }
+    hexString += temp;
+  }
+  return parseInt(hexString, 16);
+}
+
+function getIntFromHex(data) {
+  var hexString = '';
+  for (var i = 0; i < data.length; i++) {
+    var temp = data[i].toString(16);
+    if (temp.length !== 2) {
+      temp = '0' + temp;
+    }
+    hexString += temp;
+  }
+  return parseInt(hexString, 16);
+}
+
 module.exports = {
   /**
    * Identifiers are used to identify the packet received from client
@@ -887,6 +911,12 @@ module.exports = {
     getDestroyPacket: function () {
       var packet = [0x0c, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x08, 0x11];
       return new Buffer(packet, 'base64');
+    },
+    getIntFromReverseHex: function (data) {
+      return getIntFromReverseHex(data);
+    },
+    getIntFromHex: function (data) {
+      return getIntFromHex(data);
     }
   }
 };

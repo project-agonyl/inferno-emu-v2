@@ -56,6 +56,7 @@ function processRequest(socket, data) {
           clients.unsetClient(socket.remoteAddress + ':' + socket.remotePort);
         }
       });
+      socket.write(crypt.encrypt(packet.helper.getDestroyPacket()));
       break;
     case packet.identifier.game.type.SELECT_CHARACTER:
       charName = packet.helper.getCharacterName(crypt.decrypt(data));
@@ -186,9 +187,16 @@ module.exports = function (socket) {
     if (packet.helper.validatePacketSize(data, data.length)) {
       processRequest(socket, data);
     } else {
-      logger.debug('Game server received packet from client with length ' + data.length);
-      logger.debug("Packet size doesn't match with actual size of packet");
-      console.log(hexy.hexy(data));
+      var start = 0;
+      var end = packet.helper.getIntFromReverseHex(data.slice(0, 2));
+      if (end > data.length) {
+        end = packet.helper.getIntFromHex(data.slice(0, 2));
+      }
+      while (start < data.length && end <= data.length) {
+        processRequest(socket, data.slice(start, end));
+        start = end;
+        end += packet.helper.getIntFromReverseHex(data.slice(start, start + 2));
+      }
     }
   });
   // Connection close handler
