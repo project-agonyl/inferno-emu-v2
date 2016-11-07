@@ -174,6 +174,20 @@ function processRequest(socket, data) {
         });
       });
       break;
+    case packet.identifier.game.type.CAN_INTERACT_NPC:
+      client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+      if (client === null) {
+        return;
+      }
+      decryptedData = crypt.decrypt(data);
+      map.canInteractNpc(client.characterDetails, packet.helper.getIntFromReverseHex([decryptedData[12], decryptedData[13]]), function (result) {
+        if (result) {
+          socket.write(crypt.encrypt(packet.helper.getNpcInteractAckPacket(decryptedData)));
+        } else {
+          socket.write(crypt.encrypt(packet.helper.getAnnouncementPacket('You are not allowed to interact with this NPC')));
+        }
+      });
+      break;
     default:
       logger.debug('Game server received packet from client with length ' + data.length);
       console.log(hexy.hexy(data));

@@ -17,6 +17,7 @@ const CREATE_CHARACTER = 'create-character';
 const PAYMENT_INFO = 'payment-info';
 const CAN_MOVE_CHARACTER = 'can-move-character';
 const MOVED_CHARACTER = 'moved-character';
+const CAN_INTERACT_NPC = 'can-interact-npc';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -94,7 +95,8 @@ module.exports = {
         CREATE_CHARACTER: CREATE_CHARACTER,
         PAYMENT_INFO: PAYMENT_INFO,
         CAN_MOVE_CHARACTER: CAN_MOVE_CHARACTER,
-        MOVED_CHARACTER: MOVED_CHARACTER
+        MOVED_CHARACTER: MOVED_CHARACTER,
+        CAN_INTERACT_NPC: CAN_INTERACT_NPC
       }
     }
   },
@@ -278,6 +280,11 @@ module.exports = {
         case 12:
           if (packet[10] == 0x08 && packet[11] == 0x11) {
             type = DESTROY_USER;
+          }
+          break;
+        case 14:
+          if (packet[10] == 0x08 && packet[11] == 0x13) {
+            type = CAN_INTERACT_NPC;
           }
           break;
         case 33:
@@ -912,11 +919,33 @@ module.exports = {
       var packet = [0x0c, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x08, 0x11];
       return new Buffer(packet, 'base64');
     },
+    /**
+     * Returns integer value of reverse byte array
+     * @param data
+     * @returns int
+     */
     getIntFromReverseHex: function (data) {
       return getIntFromReverseHex(data);
     },
+    /**
+     * Returns integer value of byte array
+     * @param data
+     * @returns int
+     */
     getIntFromHex: function (data) {
       return getIntFromHex(data);
+    },
+    /**
+     * Returns NPC interact acknowledgement packet
+     * @param data
+     * @returns {Buffer}
+     */
+    getNpcInteractAckPacket: function (data) {
+      var packet = [0x10, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x08, 0x13];
+      packet.push(data[12]);
+      packet.push(data[13]);
+      packet = packet.concat(getEmptyPacket(2));
+      return new Buffer(packet, 'base64');
     }
   }
 };
