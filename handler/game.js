@@ -188,6 +188,15 @@ function processRequest(socket, data) {
         }
       });
       break;
+    case packet.identifier.game.type.NPC_HEALER_WINDOW_OPEN:
+      client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+      if (client === null) {
+        return;
+      }
+      clients.setClientCharacterCurrentPotionsMax(socket.remoteAddress + ':' + socket.remotePort);
+      socket.write(crypt.encrypt(packet.helper.getMaxHpMpPacket(client.characterDetails)));
+      socket.write(crypt.encrypt(packet.helper.getRecoveredFromExhaustionPacket(client.characterDetails)));
+      break;
     default:
       logger.debug('Game server received packet from client with length ' + data.length);
       console.log(hexy.hexy(data));

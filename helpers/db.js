@@ -154,6 +154,7 @@ module.exports = {
   },
   savedUpdatedCharacterDetails: function (details, callback) {
     executeQuery("UPDATE `character` SET map_id = " + details['map_id'] + ", location_x = " + details['location_x']
-      + ", location_y = " + details['location_y'] + " WHERE name = " + mysql.escape(details.name), callback);
+      + ", location_y = " + details['location_y'] + ", current_hp = " +  details['current_hp'] + ", current_mp = " + details['current_mp']
+      + " WHERE name = " + mysql.escape(details.name), callback);
   }
 };

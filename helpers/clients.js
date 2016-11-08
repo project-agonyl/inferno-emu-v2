@@ -44,6 +44,12 @@ module.exports = {
       clients[id].characterDetails['location_y'] = parseInt(y);
     }
   },
+  setClientCharacterCurrentPotionsMax: function (id) {
+    if (clients.hasOwnProperty(id)) {
+      clients[id].characterDetails['current_hp'] = clients[id].characterDetails['maximum_hp'];
+      clients[id].characterDetails['current_mp'] = clients[id].characterDetails['maximum_mp'];
+    }
+  },
   startClientPing: function () {
     clientPing = setInterval(function () {
       for (var temp in clients) {

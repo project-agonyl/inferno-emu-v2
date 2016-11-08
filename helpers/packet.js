@@ -18,6 +18,7 @@ const PAYMENT_INFO = 'payment-info';
 const CAN_MOVE_CHARACTER = 'can-move-character';
 const MOVED_CHARACTER = 'moved-character';
 const CAN_INTERACT_NPC = 'can-interact-npc';
+const NPC_HEALER_WINDOW_OPEN = 'npc-healer-window-open';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -96,7 +97,8 @@ module.exports = {
         PAYMENT_INFO: PAYMENT_INFO,
         CAN_MOVE_CHARACTER: CAN_MOVE_CHARACTER,
         MOVED_CHARACTER: MOVED_CHARACTER,
-        CAN_INTERACT_NPC: CAN_INTERACT_NPC
+        CAN_INTERACT_NPC: CAN_INTERACT_NPC,
+        NPC_HEALER_WINDOW_OPEN: NPC_HEALER_WINDOW_OPEN
       }
     }
   },
@@ -285,6 +287,11 @@ module.exports = {
         case 14:
           if (packet[10] == 0x08 && packet[11] == 0x13) {
             type = CAN_INTERACT_NPC;
+          }
+          break;
+        case 16:
+          if (packet[10] == 0x06 && packet[11] == 0x16) {
+            type = NPC_HEALER_WINDOW_OPEN;
           }
           break;
         case 33:
@@ -945,6 +952,35 @@ module.exports = {
       packet.push(data[12]);
       packet.push(data[13]);
       packet = packet.concat(getEmptyPacket(2));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns maximum HP and MP of the character packet
+     * @param characterDetails
+     * @returns {Buffer}
+     */
+    getMaxHpMpPacket: function (characterDetails) {
+      var packet = [0x10, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x07, 0x16];
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_hp'], 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_mp'], 4));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns recovered from exhaustion packet
+     * @param characterDetails
+     * @returns {Buffer}
+     */
+    getRecoveredFromExhaustionPacket: function (characterDetails) {
+      var packet = [0x27, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0xff, 0x17];
+      packet.push(0x64);
+      packet.push(0x01);
+      packet = packet.concat(getEmptyPacket(2));
+      packet.push(0x25);
+      packet = packet.concat(getEmptyPacket(13));
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_hp'], 4));
+      packet = packet.concat(getReverseHexPacket(characterDetails['maximum_mp'], 4));
+      packet.push(0x03);
+      packet = packet.concat(getEmptyPacket(4));
       return new Buffer(packet, 'base64');
     }
   }
