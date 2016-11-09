@@ -197,6 +197,41 @@ function processRequest(socket, data) {
       socket.write(crypt.encrypt(packet.helper.getMaxHpMpPacket(client.characterDetails)));
       socket.write(crypt.encrypt(packet.helper.getRecoveredFromExhaustionPacket(client.characterDetails)));
       break;
+    case packet.identifier.game.type.RECHARGE_POTIONS:
+      client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+      if (client === null) {
+        return;
+      }
+      decryptedData = crypt.decrypt(data);
+      var toFill = 40; //@todo Investigate whether amount to fill changes based on level
+      if (data[13] === 1) { //HP potting
+        if (client.characterDetails['current_hp_charge'] > 0 &&
+          client.characterDetails['maximum_hp'] > client.characterDetails['current_hp']) {
+          if (client.characterDetails['current_hp_charge'] < toFill) {
+            toFill = client.characterDetails['current_hp_charge'];
+          }
+          if (client.characterDetails['maximum_hp'] - client.characterDetails['current_hp'] < toFill) {
+            toFill = client.characterDetails['maximum_hp'] - client.characterDetails['current_hp'];
+          }
+          client.characterDetails['current_hp'] += toFill;
+          client.characterDetails['current_hp_charge'] -= toFill;
+          socket.write(crypt.encrypt(packet.helper.getRechargePotionAckPacket(data[13], client.characterDetails['current_hp'], client.characterDetails['current_hp_charge'])));
+        }
+      } else { //MP potting
+        if (client.characterDetails['current_mp_charge'] > 0 &&
+          client.characterDetails['maximum_mp'] > client.characterDetails['current_mp']) {
+          if (client.characterDetails['current_mp_charge'] < toFill) {
+            toFill = client.characterDetails['current_mp_charge'];
+          }
+          if (client.characterDetails['maximum_mp'] - client.characterDetails['current_mp'] < toFill) {
+            toFill = client.characterDetails['maximum_mp'] - client.characterDetails['current_mp'];
+          }
+          client.characterDetails['current_mp'] += toFill;
+          client.characterDetails['current_mp_charge'] -= toFill;
+          socket.write(crypt.encrypt(packet.helper.getRechargePotionAckPacket(data[13], client.characterDetails['current_mp'], client.characterDetails['current_mp_charge'])));
+        }
+      }
+      break;
     default:
       logger.debug('Game server received packet from client with length ' + data.length);
       console.log(hexy.hexy(data));

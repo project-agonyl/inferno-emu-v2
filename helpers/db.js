@@ -153,8 +153,25 @@ module.exports = {
     });
   },
   savedUpdatedCharacterDetails: function (details, callback) {
-    executeQuery("UPDATE `character` SET map_id = " + details['map_id'] + ", location_x = " + details['location_x']
-      + ", location_y = " + details['location_y'] + ", current_hp = " +  details['current_hp'] + ", current_mp = " + details['current_mp']
-      + " WHERE name = " + mysql.escape(details.name), callback);
+    var propertiesToUpdate = [
+      'map_id',
+      'location_x',
+      'location_y',
+      'current_hp',
+      'current_mp',
+      'current_hp_charge',
+      'current_mp_charge'
+    ];
+    var sql = "UPDATE `character` SET";
+    for (var i = 0; i < propertiesToUpdate.length; i++) {
+      if (details.hasOwnProperty(propertiesToUpdate[i])) {
+        if (i !== 0) {
+          sql += ',';
+        }
+        sql += " " + propertiesToUpdate[i] + " = " + details[propertiesToUpdate[i]];
+      }
+    }
+    sql += " WHERE name = " + mysql.escape(details.name);
+    executeQuery(sql, callback);
   }
 };

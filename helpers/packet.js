@@ -19,6 +19,7 @@ const CAN_MOVE_CHARACTER = 'can-move-character';
 const MOVED_CHARACTER = 'moved-character';
 const CAN_INTERACT_NPC = 'can-interact-npc';
 const NPC_HEALER_WINDOW_OPEN = 'npc-healer-window-open';
+const RECHARGE_POTIONS = 'recharge-potions';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -98,7 +99,8 @@ module.exports = {
         CAN_MOVE_CHARACTER: CAN_MOVE_CHARACTER,
         MOVED_CHARACTER: MOVED_CHARACTER,
         CAN_INTERACT_NPC: CAN_INTERACT_NPC,
-        NPC_HEALER_WINDOW_OPEN: NPC_HEALER_WINDOW_OPEN
+        NPC_HEALER_WINDOW_OPEN: NPC_HEALER_WINDOW_OPEN,
+        RECHARGE_POTIONS: RECHARGE_POTIONS
       }
     }
   },
@@ -287,6 +289,8 @@ module.exports = {
         case 14:
           if (packet[10] == 0x08 && packet[11] == 0x13) {
             type = CAN_INTERACT_NPC;
+          } else if (packet[10] == 0x67 && packet[11] == 0x17) {
+            type = RECHARGE_POTIONS;
           }
           break;
         case 16:
@@ -981,6 +985,21 @@ module.exports = {
       packet = packet.concat(getReverseHexPacket(characterDetails['maximum_mp'], 4));
       packet.push(0x03);
       packet = packet.concat(getEmptyPacket(4));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns potting acknowledge packet
+     * @param type
+     * @param currentPotion
+     * @param currentPotionCharge
+     * @returns {Buffer}
+     */
+    getRechargePotionAckPacket: function (type, currentPotion, currentPotionCharge) {
+      var packet = [0x16, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x67, 0x17];
+      packet.push(type);
+      packet.push(0x01);
+      packet = packet.concat(getReverseHexPacket(currentPotion, 8));
+      packet = packet.concat(getReverseHexPacket(currentPotionCharge, 8));
       return new Buffer(packet, 'base64');
     }
   }
