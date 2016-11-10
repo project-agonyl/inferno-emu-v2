@@ -20,6 +20,7 @@ const MOVED_CHARACTER = 'moved-character';
 const CAN_INTERACT_NPC = 'can-interact-npc';
 const NPC_HEALER_WINDOW_OPEN = 'npc-healer-window-open';
 const RECHARGE_POTIONS = 'recharge-potions';
+const TELEPORT_REQUEST = 'teleport-request';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -100,7 +101,8 @@ module.exports = {
         MOVED_CHARACTER: MOVED_CHARACTER,
         CAN_INTERACT_NPC: CAN_INTERACT_NPC,
         NPC_HEALER_WINDOW_OPEN: NPC_HEALER_WINDOW_OPEN,
-        RECHARGE_POTIONS: RECHARGE_POTIONS
+        RECHARGE_POTIONS: RECHARGE_POTIONS,
+        TELEPORT_REQUEST: TELEPORT_REQUEST
       }
     }
   },
@@ -291,6 +293,8 @@ module.exports = {
             type = CAN_INTERACT_NPC;
           } else if (packet[10] == 0x67 && packet[11] == 0x17) {
             type = RECHARGE_POTIONS;
+          } else if (packet[10] == 0x12 && packet[11] == 0x11) {
+            type = TELEPORT_REQUEST;
           }
           break;
         case 16:
@@ -1000,6 +1004,24 @@ module.exports = {
       packet.push(0x01);
       packet = packet.concat(getReverseHexPacket(currentPotion, 8));
       packet = packet.concat(getReverseHexPacket(currentPotionCharge, 8));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * @todo Investigate what packet this is
+     * @returns {Buffer}
+     */
+    getPacket52: function () {
+      var packet = [0x34, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x01, 0x13];
+      packet = packet.concat([0xe0, 0x31, 0xf4, 0x2f]);
+      packet = packet.concat([0x66, 0x92]);
+      packet = packet.concat(getEmptyPacket(2));
+      packet = packet.concat([0x67, 0x93]);
+      packet = packet.concat(getEmptyPacket(2));
+      packet = packet.concat([0x68, 0x94]);
+      packet = packet.concat(getEmptyPacket(2));
+      for (var i = 0; i < 52 - packet.length; i++) {
+        packet.push(0xff);
+      }
       return new Buffer(packet, 'base64');
     }
   }
