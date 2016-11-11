@@ -20,7 +20,7 @@ const MOVED_CHARACTER = 'moved-character';
 const CAN_INTERACT_NPC = 'can-interact-npc';
 const NPC_HEALER_WINDOW_OPEN = 'npc-healer-window-open';
 const RECHARGE_POTIONS = 'recharge-potions';
-const TELEPORT_REQUEST = 'teleport-request';
+const WARP_REQUEST = 'warp-request';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -102,7 +102,7 @@ module.exports = {
         CAN_INTERACT_NPC: CAN_INTERACT_NPC,
         NPC_HEALER_WINDOW_OPEN: NPC_HEALER_WINDOW_OPEN,
         RECHARGE_POTIONS: RECHARGE_POTIONS,
-        TELEPORT_REQUEST: TELEPORT_REQUEST
+        WARP_REQUEST: WARP_REQUEST
       }
     }
   },
@@ -293,8 +293,11 @@ module.exports = {
             type = CAN_INTERACT_NPC;
           } else if (packet[10] == 0x67 && packet[11] == 0x17) {
             type = RECHARGE_POTIONS;
-          } else if (packet[10] == 0x12 && packet[11] == 0x11) {
-            type = TELEPORT_REQUEST;
+          }
+          break;
+        case 18:
+          if (packet[10] == 0x12 && packet[11] == 0x11) {
+            type = WARP_REQUEST;
           }
           break;
         case 16:
