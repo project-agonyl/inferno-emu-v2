@@ -10,18 +10,8 @@ var processInstances = {};
 
 function spawnProcess(logDisplayName, command, args) {
   logger.info('Starting ' + logDisplayName);
-  var instance = childProcess.spawn(command, args);
-  instance.stdout.on('data', function (pData) {
-    console.log('[' + logDisplayName + '] ' + pData);
-  });
-  instance.stderr.on('data', function (pData) {
-    logger.error('[' + logDisplayName + '][ERROR] ' + pData);
-  });
-  instance.on('close', function (code) {
-    logger.warn(logDisplayName + ' is shutting down with code ' + code);
-  });
-  return instance;
+  return childProcess.fork(command, args);
 }
 
-processInstances['LoginServer'] = spawnProcess('LoginServer', 'node', ['./server/LoginServer']);
-processInstances['GameServer'] = spawnProcess('GameServer', 'node', ['./server/GameServer']);
+processInstances['LoginServer'] = spawnProcess('LoginServer', './server/LoginServer', []);
+processInstances['GameServer'] = spawnProcess('GameServer', './server/GameServer', []);
