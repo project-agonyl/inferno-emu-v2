@@ -15,6 +15,7 @@ var map = require(__dirname + '/../helpers/map.js');
 var db = require(__dirname + '/../helpers/db.js');
 var config = require(__dirname + '/../config/config.js');
 var crypt = require(__dirname + '/../helpers/crypt.js');
+var tp = require(__dirname + '/../helpers/teleport.js');
 
 clients.startClientPing();
 
@@ -231,6 +232,59 @@ function processRequest(socket, data) {
           socket.write(crypt.encrypt(packet.helper.getRechargePotionAckPacket(data[13], client.characterDetails['current_mp'], client.characterDetails['current_mp_charge'])));
         }
       }
+      break;
+    case packet.identifier.game.type.WARP_MAP_REQUEST:
+      decryptedData = crypt.decrypt(data);
+      client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+      if (client === null) {
+        return;
+      }
+      tp.canWarp(client.characterDetails, packet.helper.getIntFromReverseHex([decryptedData[16], decryptedData[17]]), function (result, data) {
+        if (result) {
+          var arrayData = data.split(',');
+          client.characterDetails['map_id'] = parseInt(arrayData[0]);
+          client.characterDetails['location_x'] = parseInt(arrayData[1]);
+          client.characterDetails['location_y'] = parseInt(arrayData[2]);
+          client.characterDetails['woonz'] -= 250 + (50 * (client.characterDetails['level'] - 1));
+          socket.write(crypt.encrypt(packet.helper.getWarpMapPacket(client.characterDetails['map_id'])), function () {
+            socket.write(crypt.encrypt(packet.helper.getCanWarpAckPacket()));
+          });
+        } else {
+          socket.write(crypt.encrypt(packet.helper.getAnnouncementPacket('You are not allowed to teleport to that map')));
+        }
+      });
+      break;
+    case packet.identifier.game.type.WARP_LOCATION_REQUEST:
+      client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+      if (client === null) {
+        return;
+      }
+      socket.write(crypt.encrypt(packet.helper.getWarpLocationPacket(client.characterDetails['location_x'], client.characterDetails['location_y'])));
+      break;
+    case packet.identifier.game.type.WARPED_CHARACTER:
+      decryptedData = crypt.decrypt(data);
+      client = clients.getClient(socket.remoteAddress + ':' + socket.remotePort);
+      if (client === null) {
+        return;
+      }
+      socket.write(crypt.encrypt(packet.helper.getWarpedAckPacket(data[12])), function() {
+        map.loadNpc(client.characterDetails['map_id'], function (result, data) {
+          if (result) {
+            for (var i = 0; i < data.length; i = i + 8) {
+              if (data[i] === 0x9f && data[i + 1] === 0x01 &&
+                data[i + 2] === 0x80 && data[i + 3] === 0x80 &&
+                data[i + 6] === 0x02 && data[i + 7] === 0x6a) {
+                break;
+              }
+              socket.write(crypt.encrypt(packet.helper.getNpcPacket(
+                [data[i], data[i + 1]],
+                [data[i + 2], data[i + 3]],
+                [data[i + 6], data[i + 7]]
+              )));
+            }
+          }
+        });
+      });
       break;
     default:
       logger.debug('Game server received packet from client with length ' + data.length);

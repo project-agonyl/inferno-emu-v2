@@ -160,7 +160,8 @@ module.exports = {
       'current_hp',
       'current_mp',
       'current_hp_charge',
-      'current_mp_charge'
+      'current_mp_charge',
+      'woonz'
     ];
     var sql = "UPDATE `character` SET";
     for (var i = 0; i < propertiesToUpdate.length; i++) {

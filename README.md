@@ -20,7 +20,8 @@ Running the Project
 3. Import database schema from ``data/db.sql`` into your emulator database
 4. Insert example test data from ``data/seed.sql``
 5. Place all ``.n_ndt`` files found in ``a3server/7Zoneserver/ZoneData/map`` from A3 219 server files released in RaGEZONE inside ``data/map`` to show NPCs in game (Download link: http://www.mediafire.com/file/24jijiaiqa3aaxn/A3+Server+219.rar)
-6. Run the command ``node main`` to start the server
+6. Place ``Teleport.txt`` file ``a3server/7Zoneserver/ZoneData`` inside ``data`` folder for warping character
+7. Run the command ``node main`` to start the server
 
 Client
 ------

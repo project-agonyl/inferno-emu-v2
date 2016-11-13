@@ -20,7 +20,9 @@ const MOVED_CHARACTER = 'moved-character';
 const CAN_INTERACT_NPC = 'can-interact-npc';
 const NPC_HEALER_WINDOW_OPEN = 'npc-healer-window-open';
 const RECHARGE_POTIONS = 'recharge-potions';
-const WARP_REQUEST = 'warp-request';
+const WARP_MAP_REQUEST = 'warp-map-request';
+const WARP_LOCATION_REQUEST = 'warped-location-request';
+const WARPED_CHARACTER = 'warped-character';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -102,7 +104,9 @@ module.exports = {
         CAN_INTERACT_NPC: CAN_INTERACT_NPC,
         NPC_HEALER_WINDOW_OPEN: NPC_HEALER_WINDOW_OPEN,
         RECHARGE_POTIONS: RECHARGE_POTIONS,
-        WARP_REQUEST: WARP_REQUEST
+        WARP_MAP_REQUEST: WARP_MAP_REQUEST,
+        WARP_LOCATION_REQUEST: WARP_LOCATION_REQUEST,
+        WARPED_CHARACTER: WARPED_CHARACTER
       }
     }
   },
@@ -288,16 +292,23 @@ module.exports = {
             type = DESTROY_USER;
           }
           break;
+        case 13:
+          if (packet[10] == 0x00 && packet[11] == 0x19) {
+            type = WARPED_CHARACTER;
+          }
+          break;
         case 14:
           if (packet[10] == 0x08 && packet[11] == 0x13) {
             type = CAN_INTERACT_NPC;
           } else if (packet[10] == 0x67 && packet[11] == 0x17) {
             type = RECHARGE_POTIONS;
+          } else if (packet[10] == 0x11 && packet[11] == 0x11) {
+            type = WARP_LOCATION_REQUEST;
           }
           break;
         case 18:
           if (packet[10] == 0x12 && packet[11] == 0x11) {
-            type = WARP_REQUEST;
+            type = WARP_MAP_REQUEST;
           }
           break;
         case 16:
@@ -1010,7 +1021,7 @@ module.exports = {
       return new Buffer(packet, 'base64');
     },
     /**
-     * @todo Investigate what packet this is
+     * @todo Investigate what packet this is (Probably monster move packet)
      * @returns {Buffer}
      */
     getPacket52: function () {
@@ -1025,6 +1036,52 @@ module.exports = {
       for (var i = 0; i < 52 - packet.length; i++) {
         packet.push(0xff);
       }
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns teleport map packet
+     * @param mapId
+     * @returns {Buffer}
+     */
+    getWarpMapPacket: function (mapId) {
+      var packet = [0x0e, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x10, 0x11];
+      packet = packet.concat(getReverseHexPacket(mapId, 4));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns can teleport acknowledgement packet
+     * @returns {Buffer}
+     */
+    getCanWarpAckPacket: function () {
+      var packet = [0x11, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x08, 0x16];
+      packet.push(0x06);
+      for (var i = 0; i < 3; i++) {
+        packet.push(0xff);
+      }
+      packet.push(0x00);
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns teleport location packet
+     * @param x
+     * @param y
+     * @returns {Buffer}
+     */
+    getWarpLocationPacket: function (x, y) {
+      var packet = [0x10, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x11, 0x11];
+      packet.push(parseInt(x));
+      packet.push(parseInt(y));
+      packet = packet.concat(getEmptyPacket(2));
+      return new Buffer(packet, 'base64');
+    },
+    /**
+     * Returns warped character acknowledgement packet
+     * @param ack
+     * @returns {Buffer}
+     */
+    getWarpedAckPacket: function(ack) {
+      var packet = [0x0d, 0x00, 0x00, 0x00, 0x97, 0xb3, 0x16, 0x00, 0x03, 0xff, 0x00, 0x19];
+      packet.push(ack);
       return new Buffer(packet, 'base64');
     }
   }
