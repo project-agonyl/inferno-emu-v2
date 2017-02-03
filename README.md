@@ -23,6 +23,21 @@ Running the Project
 6. Place ``Teleport.txt`` file ``a3server/7Zoneserver/ZoneData`` inside ``data`` folder for warping character
 7. Run the command ``node main`` to start the server
 
+Currently available features
+----------------------------
+1. Account login
+2. Account reconnect and exit
+3. Character listing
+4. Character creation
+5. Character deletion
+6. Loading NPCs in each map and teleport list
+7. Character entering game world
+8. Character movement
+9. Character HP and MP filling
+10. Character-NPC interaction
+11. Character teleportation
+12. Showing of server announcement messages and shouts
+
 Client
 ------
-Emulator has been tested with A3 client version 562. Other client versions may not work!
+Emulator has been tested with A3 client version 562 (Check https://github.com/cyberinferno/InfernoEmu/tree/master/Important%20Files). Other client versions may not work!
