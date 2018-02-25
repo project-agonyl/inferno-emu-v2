@@ -6,6 +6,7 @@
 
 var packet = require("./packet.js");
 const logger = require('./logger.js');
+var item = require("./item.js");
 
 var characterType = {WARRIOR: 0x00, MAGE: 0x02, HK: 0x01, ARCHER: 0x03, EMPTY: 0xFF};
 var characterTown = {TEMOZ: 0x00, QUANATO: 0x01};
@@ -47,10 +48,24 @@ module.exports = {
       charPacket.push(charType);
       charPacket.push(charTown);
       charPacket = charPacket.concat(packet.helper.toBytesInt32(charLevel));
-      charPacket.push(0x00);
-      charPacket.push(0x00);
-      charPacket.push(0x00);
-      charPacket.push(0x00);
+      if (rows[index] != undefined && rows[index].wear !== null && rows[index].wear !== '') {
+        var wearArray = rows[index].wear.split(';');
+        for (var j = 0; j < wearArray.length; j += 3) {
+          charPacket.push(0x00);
+          charPacket.push(0x00);
+          charPacket.push(0x00);
+          charPacket.push(0x00);
+          var itemCode1 = parseInt(wearArray[j]);
+          var itemCode2 = parseInt(wearArray[j + 1]);
+          if (isNaN(itemCode1) || isNaN(itemCode2)) {
+            continue;
+          }
+          var itemDetails = item.getItem(itemCode1);
+          charPacket = charPacket.concat(packet.helper.getReverseHexPacket(itemCode1, 8));
+          charPacket = charPacket.concat(packet.helper.getReverseHexPacket(itemCode2, 8));
+          charPacket = charPacket.concat(packet.helper.getReverseHexPacket(itemDetails.type, 8));
+        }
+      }
       var packetLength = charPacket.length;
       for (var i = 0; i < 188 - packetLength; i++) {
         charPacket.push(0x00);

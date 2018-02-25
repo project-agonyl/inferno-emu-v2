@@ -23,6 +23,7 @@ const RECHARGE_POTIONS = 'recharge-potions';
 const WARP_MAP_REQUEST = 'warp-map-request';
 const WARP_LOCATION_REQUEST = 'warped-location-request';
 const WARPED_CHARACTER = 'warped-character';
+const RECHARGE_POTIONS_FULL = 'recharge-potions-full';
 
 function getReverseHexPacket(number, length) {
   number = parseInt(number);
@@ -106,7 +107,8 @@ module.exports = {
         RECHARGE_POTIONS: RECHARGE_POTIONS,
         WARP_MAP_REQUEST: WARP_MAP_REQUEST,
         WARP_LOCATION_REQUEST: WARP_LOCATION_REQUEST,
-        WARPED_CHARACTER: WARPED_CHARACTER
+        WARPED_CHARACTER: WARPED_CHARACTER,
+        RECHARGE_POTIONS_FULL: RECHARGE_POTIONS_FULL
       }
     }
   },
@@ -314,6 +316,8 @@ module.exports = {
         case 16:
           if (packet[10] == 0x06 && packet[11] == 0x16) {
             type = NPC_HEALER_WINDOW_OPEN;
+          } else if (packet[10] == 0x1c && packet[11] == 0x50) {
+            type = RECHARGE_POTIONS_FULL;
           }
           break;
         case 33:
@@ -963,6 +967,9 @@ module.exports = {
      */
     getIntFromHex: function (data) {
       return getIntFromHex(data);
+    },
+    getReverseHexPacket: function (number, length) {
+      return getReverseHexPacket(number, length)
     },
     /**
      * Returns NPC interact acknowledgement packet

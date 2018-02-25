@@ -16,6 +16,7 @@ var db = require(__dirname + '/../helpers/db.js');
 var config = require(__dirname + '/../config/config.js');
 var crypt = require(__dirname + '/../helpers/crypt.js');
 var tp = require(__dirname + '/../helpers/teleport.js');
+var item = require(__dirname + '/../helpers/item.js');
 
 clients.startClientPing();
 
@@ -267,7 +268,7 @@ function processRequest(socket, data) {
       if (client === null) {
         return;
       }
-      socket.write(crypt.encrypt(packet.helper.getWarpedAckPacket(data[12])), function() {
+      socket.write(crypt.encrypt(packet.helper.getWarpedAckPacket(data[12])), function () {
         map.loadNpc(client.characterDetails['map_id'], function (result, data) {
           if (result) {
             for (var i = 0; i < data.length; i = i + 8) {
@@ -285,6 +286,14 @@ function processRequest(socket, data) {
           }
         });
       });
+      break;
+    case packet.identifier.game.type.RECHARGE_POTIONS_FULL:
+      decryptedData = crypt.decrypt(data);
+      var shout = '';
+      for (var i = 12; i < decryptedData.length; i++) {
+        shout += decryptedData[i] + ' ';
+      }
+      socket.write(crypt.encrypt(packet.helper.getAnnouncementPacket(shout)));
       break;
     default:
       logger.debug('Game server received packet from client with length ' + data.length);
