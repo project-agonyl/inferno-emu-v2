@@ -1,11 +1,14 @@
 {
   "name": "inferno-emu-v2",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "description": "Inferno emu A3 server emulator in NodeJS",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm main.js"
+    "start": "node main.js"
   },
   "author": "cyberinferno",
   "repository": {
@@ -18,15 +21,15 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
-    "colors": "^1.1.2",
-    "hexy": "^0.2.7",
-    "lodash": "^4.13.1",
-    "mysql": "^2.11.1",
-    "redis": "^2.6.2",
-    "tracer": "^0.8.3"
+    "colors": "^1.3.2",
+    "hexy": "^0.2.11",
+    "lodash": "^4.17.11",
+    "mysql": "^2.16.0",
+    "redis": "^2.8.0",
+    "tracer": "^0.8.15"
   },
   "devDependencies": {
-    "eslint": "^4.18.1",
-    "eslint-config-strongloop": "^2.1.0"
+    "eslint": "^4.19.1",
+    "eslint-plugin-node": "^7.0.1"
   }
 }
